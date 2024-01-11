@@ -1,0 +1,46 @@
+# Copyright 2023 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'Troubleshooting'
+
+on:
+  issues:
+    types:
+      - 'opened'
+
+jobs:
+  troubleshooting:
+    permissions:
+      issues: 'write'
+
+    runs-on: 'ubuntu-latest'
+
+    steps:
+      - uses: 'actions/github-script@v6'
+        with:
+          script: |-
+            const msg =
+              `Hi there @${context.actor} :wave:!\n` +
+              `\n` +
+              `Thank you for opening an issue. Our team will triage this as soon as we ` +
+              `can. Please take a moment to review the ` +
+              `[troubleshooting steps](https://github.com/google-github-actions/auth/blob/main/docs/TROUBLESHOOTING.md) ` +
+              `which lists common error messages and their resolution steps.`;
+
+            await github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: msg,
+            });
