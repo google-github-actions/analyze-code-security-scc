@@ -4,7 +4,7 @@
   "description": "Provides functionality to scan code for vulnerability during the build step of the project.",
   "main": "dist/main/index.js",
   "scripts": {
-    "build": "ncc build -m src/main.ts -o dist/main && ncc build -m src/post.ts -o dist/post",
+    "build": "ncc build -m src/main.ts -o dist/main",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write **/*.ts",
     "test": "bash ./bin/runTests.sh"
