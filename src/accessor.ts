@@ -196,7 +196,7 @@ export class IACAccessor {
       return false;
     }
     const currentTime = new Date().getTime();
-    return currentTime < (this.scanStartTime + this.scanTimeOut);
+    return currentTime < this.scanStartTime + this.scanTimeOut;
   }
 
   private validatePollOperationResponse(operation: Operation) {

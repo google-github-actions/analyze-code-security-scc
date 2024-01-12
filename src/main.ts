@@ -213,7 +213,7 @@ function validateAndBuildConfig(
   let parsedFailureCriteria = validateAndParseFailureCriteria(DEFAULT_FAILURE_CRITERIA);
   let parsedFailSilently = DEFAULT_FAIL_SILENTLY;
 
-  let errors = [];
+  const errors = [];
   try {
     validateAuthToken(authToken);
   } catch (err) {
@@ -240,22 +240,22 @@ function validateAndBuildConfig(
     errors.push(err);
   }
   try {
-  parsedScanTimeOut =  validateAndParseScanTimeOut(scanTimeOut);
+    parsedScanTimeOut = validateAndParseScanTimeOut(scanTimeOut);
   } catch (err) {
     errors.push(err);
   }
   try {
-  parsedIgnoreViolations = validateAndParseIgnoreViolations(ignoreViolations);
+    parsedIgnoreViolations = validateAndParseIgnoreViolations(ignoreViolations);
   } catch (err) {
     errors.push(err);
   }
   try {
-  parsedFailureCriteria = validateAndParseFailureCriteria(failureCriteria);
+    parsedFailureCriteria = validateAndParseFailureCriteria(failureCriteria);
   } catch (err) {
     errors.push(err);
   }
   try {
-  parsedFailSilently = validateAndParseFailSilently(failSilently);
+    parsedFailSilently = validateAndParseFailSilently(failSilently);
   } catch (err) {
     errors.push(err);
   }
@@ -276,7 +276,7 @@ function validateAndBuildConfig(
     scan_time_out: parsedScanTimeOut,
     ignore_violations: parsedIgnoreViolations,
     failure_criteria: parsedFailureCriteria,
-    fail_silently: parsedFailSilently
+    fail_silently: parsedFailSilently,
   };
 }
 
