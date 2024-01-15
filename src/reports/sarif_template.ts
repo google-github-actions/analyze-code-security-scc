@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,6 +14,10 @@
  * limitations under the License.
  */
 
+/**
+ * Rule object in SARIF format, contains details of the policies that
+ * were evaluated during scan.
+ */
 export type Rule = {
   id: string;
   fullDescription?: {
@@ -32,6 +36,10 @@ export type Rule = {
   };
 };
 
+/**
+ * Result object in SARIF format, contains details of the violations found
+ * during scanning.
+ */
 export type Result = {
   ruleId: string;
   message: {
@@ -49,6 +57,9 @@ export type Result = {
   };
 };
 
+/**
+ * Template for generating SARIF report.
+ */
 export type SARIFTemplate = {
   version: string;
   $schema: string;

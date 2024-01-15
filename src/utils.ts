@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,57 +14,18 @@
  * limitations under the License.
  */
 
-import { errorMessage } from '@google-github-actions/actions-utils/dist';
+import { errorMessage, parseDuration } from '@google-github-actions/actions-utils/dist';
 import { FailureCriteria, IACType, Operator } from './input_configuration';
 import { Severity, Violation } from './accessor';
 import {
   DEFAULT_FAILURE_CRITERIA,
   DEFAULT_FAIL_SILENTLY,
   DEFAULT_IGNORE_VIOLATIONS,
-  DEFAULT_SCAN_TIME_OUT,
-  MAX_SCAN_TIME_OUT,
-  MIN_SCAN_TIME_OUT,
-  SCAN_TIME_OUT_CONFIG_KEY,
+  DEFAULT_SCAN_TIMEOUT,
+  MAX_SCAN_TIMEOUT,
+  MIN_SCAN_TIMEOUT,
+  SCAN_TIMEOUT_CONFIG_KEY,
 } from './commons/constants';
-
-/**
- * isValidJSONFile decides whether the given plan file is a valid json.
- */
-export function isValidJSONFile(tfPlanJSON: Uint8Array): boolean {
-  try {
-    return isValidJSON(new TextDecoder('utf8').decode(tfPlanJSON));
-  } catch (err) {
-    return false;
-  }
-}
-
-/**
- * validateOrgID decides whether given orgID is valid.
- */
-export function validateOrgID(orgID: string) {
-  const regEx = new RegExp('[0-9]+');
-  if (isEmptyString(orgID) && regEx.test(orgID)) {
-    throw new Error(`invalid orgID: ${orgID}, please provide a valid GCP OrgID.`);
-  }
-}
-
-/**
- * validateAuthToken decides whether given auth token is valid.
- */
-export function validateAuthToken(token: string) {
-  if (isEmptyString(token)) {
-    throw new Error(`auth token should not be empty.`);
-  }
-}
-
-/**
- * validateScanFileRef decides whether given scan file reference is valid.
- */
-export function validateScanFileRef(scan_file_ref: string) {
-  if (isEmptyString(scan_file_ref)) {
-    throw new Error(`scan file ref should not be empty.`);
-  }
-}
 
 /**
  * validateIACType decides whether given iac type is valid.
@@ -74,40 +35,31 @@ export function validateIACType(iac_type: string) {
     throw new Error(`IAC type should not be empty.`);
   }
   if (iac_type.toUpperCase() != IACType.TERRAFORM) {
-    throw new Error(`IAC type: ${iac_type} not supportted`);
+    throw new Error(`IAC type: ${iac_type} not supported`);
   }
 }
 
 /**
- * validateIACVersion decides whether given iac version is valid.
- */
-export function validateIACVersion(iac_version: string) {
-  if (isEmptyString(iac_version)) {
-    throw new Error(`IAC version should not be empty.`);
-  }
-}
-
-/**
- * validateAndParseScanTimeOut valdiates whether given string is valid time out for scan.
+ * validateAndParseScanTimeOut validates whether given string is valid timeout for scan.
  *
- * If the string is empty or null, this returns the default value for scan_time_out.
+ * If the string is empty or null, this returns the default value for scan_timeout.
  */
-export function validateAndParseScanTimeOut(scan_time_out?: string): number {
-  if (isEmptyString(scan_time_out)) {
-    return DEFAULT_SCAN_TIME_OUT;
+export function validateAndParseScanTimeOut(scan_timeout?: string): number {
+  if (isEmptyString(scan_timeout)) {
+    return DEFAULT_SCAN_TIMEOUT;
   }
 
   try {
-    const scanTimeOutNum = validateAndReturnNumber(scan_time_out);
-    if (scanTimeOutNum > MAX_SCAN_TIME_OUT || scanTimeOutNum < MIN_SCAN_TIME_OUT) {
+    const scanTimeOutNum = parseDuration(scan_timeout ?? '') * 1000;
+    if (scanTimeOutNum > MAX_SCAN_TIMEOUT || scanTimeOutNum < MIN_SCAN_TIMEOUT) {
       throw new Error(
-        `Expected ${SCAN_TIME_OUT_CONFIG_KEY} to be less than ${MAX_SCAN_TIME_OUT} and greater than ${MIN_SCAN_TIME_OUT}, found: ${scanTimeOutNum}`,
+        `Expected ${SCAN_TIMEOUT_CONFIG_KEY} to be less than or equal to ${MAX_SCAN_TIMEOUT} and greater than or equal to ${MIN_SCAN_TIMEOUT}, found: ${scanTimeOutNum}`,
       );
     }
     return scanTimeOutNum;
   } catch (err) {
     const msg = errorMessage(err);
-    throw new Error(`scan_time_out validation failed: ${msg}`);
+    throw new Error(`scan_timeout validation failed: ${msg}`);
   }
 }
 
@@ -144,7 +96,7 @@ export function validateAndParseFailureCriteria(failure_criteria?: string): Fail
     failure_criteria = DEFAULT_FAILURE_CRITERIA;
   }
   try {
-    const keyValueMap: Map<string, string> = constuctKeyValueMapFromString(failure_criteria);
+    const keyValueMap: Map<string, string> = constructKeyValueMapFromString(failure_criteria);
     return validateAndExtractFailureCriteriaFromMap(keyValueMap);
   } catch (err) {
     const msg = errorMessage(err);
@@ -203,7 +155,7 @@ export function getViolationCountBySeverity(violations: Violation[]): Map<Severi
   return violationsCountBySeverity;
 }
 
-function constuctKeyValueMapFromString(str?: string): Map<string, string> {
+function constructKeyValueMapFromString(str?: string): Map<string, string> {
   const keyValueMap: Map<string, string> = new Map<string, string>();
   str?.split(',').forEach((criteria) => {
     if (criteria.split(':').length != 2) {
@@ -309,13 +261,4 @@ function validateAndReturnBoolean(str?: string): boolean {
 
 function isEmptyString(str?: string): boolean {
   return str == null || str == '';
-}
-
-function isValidJSON(json: string) {
-  try {
-    JSON.parse(json);
-    return true;
-  } catch (err) {
-    return false;
-  }
 }

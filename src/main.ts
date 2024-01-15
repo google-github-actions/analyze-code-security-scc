@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -23,7 +23,7 @@ import {
   error as logError,
 } from '@actions/core';
 
-import * as fs from 'fs';
+import * as fs from 'fs/promises';
 
 import { errorMessage } from '@google-github-actions/actions-utils';
 
@@ -35,23 +35,18 @@ import {
   validateAndParseFailureCriteria,
   validateAndParseIgnoreViolations,
   validateAndParseScanTimeOut,
-  validateAuthToken,
   validateIACType,
-  validateIACVersion,
-  validateOrgID,
-  validateScanFileRef,
 } from './utils';
 import { IACAccessor, Severity, Violation } from './accessor';
 import { VALIDATE_ENDPOINT_DOMAIN } from './commons/http_config';
-import { SarifReportGenerator } from './reports/sarif_report_generator';
+import { SarifReportGenerator } from './reports/iac_scan_report_processor';
 import { IACScanReportProcessor } from './reports/iac_scan_report_processor';
 import {
   ACTION_FAIL_ERROR,
-  AUTH_TOKEN_CONFIG_KEY,
   DEFAULT_FAILURE_CRITERIA,
   DEFAULT_FAIL_SILENTLY,
   DEFAULT_IGNORE_VIOLATIONS,
-  DEFAULT_SCAN_TIME_OUT,
+  DEFAULT_SCAN_TIMEOUT,
   FAILURE_CRITERIA_CONFIG_KEY,
   FAIL_SILENTLY_CONFIG_KEY,
   IAC_SCAN_RESULT,
@@ -62,7 +57,7 @@ import {
   ORGANIZATION_ID_CONFIG_KEY,
   SARIF_REPORT_FILE_NAME,
   SCAN_FILE_REF_CONFIG_KEY,
-  SCAN_TIME_OUT_CONFIG_KEY,
+  SCAN_TIMEOUT_CONFIG_KEY,
 } from './commons/constants';
 
 // Do not listen to the linter - this can NOT be rewritten as an ES6 import
@@ -71,35 +66,33 @@ import {
 const version = require('../package.json').version;
 
 async function run(): Promise<void> {
-  logInfo(`IAC Scanning Action invoked.`);
+  logInfo(`IaC Scanning Action invoked`);
   let config;
   try {
-    config = generateConfig();
-    const planFile = readPlanFile(config.scan_file_ref);
-    logInfo(`Successfullly read IAC file from: ${config.scan_file_ref}`);
+    config = generateAndValidateConfig();
+    const planFile: string = await fs.readFile(config.scan_file_ref, 'utf-8');
+    logInfo(`Successfullly read IaC file from: ${config.scan_file_ref}`);
 
     const scanStartTime = new Date().getTime();
     const accessor = new IACAccessor(
       VALIDATE_ENDPOINT_DOMAIN,
-      config.auth_token,
       config.organization_id,
-      config.scan_time_out,
+      config.scan_timeout,
       scanStartTime,
       version,
     );
-    const planFileBytes: Uint8Array = new TextEncoder().encode(planFile);
-    logInfo(`Fetching violations for IAC file`);
-    const violations: Violation[] = await accessor.scan(planFileBytes);
-    logDebug(`Violations fetched from IAC scan API's.`);
+    logInfo(`Fetching violations for IaC file`);
+    const violations: Violation[] = await accessor.scan(planFile);
+    logDebug(`Violations fetched from IaC scan API's`);
 
     const sarifReportGenerator: SarifReportGenerator = new SarifReportGenerator(version);
-    const reportProcessor: IACScanReportProcessor = new IACScanReportProcessor(
+    logInfo('Processing report generation for violations fetched');
+    await IACScanReportProcessor.processReport(
+      violations,
       sarifReportGenerator,
       SARIF_REPORT_FILE_NAME,
     );
-    logInfo('Processing report generation for violations fetched.');
-    reportProcessor.processReport(violations);
-    logDebug(`IAC scan report processing completed.`);
+    logDebug(`IaC scan report processing completed`);
 
     const failureCriteriaSatisfied = isFailureCriteriaSatisfied(config, violations);
     if (failureCriteriaSatisfied && !config.ignore_violations) {
@@ -111,16 +104,18 @@ async function run(): Promise<void> {
       failureCriteriaSatisfied ? IAC_SCAN_RESULT.FAILED : IAC_SCAN_RESULT.PASSED,
     );
 
-    logInfo(`IAC Scanning completed.`);
+    logInfo(`IaC Scanning completed`);
   } catch (err) {
     const msg = errorMessage(err);
     setOutput(IAC_SCAN_RESULT_OUTPUT_KEY, IAC_SCAN_RESULT.ERROR);
+    // if config is not found or `fail_silently` is configured to false fail the build.
     if (!config?.fail_silently) {
       setFailed(ACTION_FAIL_ERROR(`failing build due to internal error: ${msg}`));
+    } else {
+      logError(
+        `Encountered internal error: ${msg}, suppressing error due to ${FAIL_SILENTLY_CONFIG_KEY} being true.`,
+      );
     }
-    logError(
-      `Encountered internal error: ${msg}, suppressing error due to ${FAIL_SILENTLY_CONFIG_KEY} being true.`,
-    );
   }
 }
 
@@ -146,119 +141,67 @@ function isFailureCriteriaSatisfied(config: InputConfiguration, violations: Viol
 }
 
 /**
- * readPlanFile read's the terraform plan file.
- *
- * @param filePath absolute file name of plan file.
+ * generateAndValidateConfig get's the action inputs and converts them into InputConfiguration.
  */
-function readPlanFile(filePath: string): any {
-  const planFile = fs.readFileSync(filePath, 'utf-8');
-  return planFile;
-}
-
-/**
- * generateConfig get's the action inputs and converts them into InputConfiguration.
- */
-function generateConfig(): InputConfiguration {
-  const authToken = getInput(AUTH_TOKEN_CONFIG_KEY);
+function generateAndValidateConfig(): InputConfiguration {
   const organizationId = getInput(ORGANIZATION_ID_CONFIG_KEY);
   const scanFileRef = getInput(SCAN_FILE_REF_CONFIG_KEY);
   const iacType = getInput(IAC_TYPE_CONFIG_KEY);
   const iacVersion = getInput(IAC_VERSION_CONFIG_KEY);
-  const scanTimeOut = getInput(SCAN_TIME_OUT_CONFIG_KEY);
+  const scanTimeOut = getInput(SCAN_TIMEOUT_CONFIG_KEY);
   const ignoreViolations = getInput(IGONRE_VIOLATIONS_CONFIG_KEY);
   const failureCriteria = getInput(FAILURE_CRITERIA_CONFIG_KEY);
   const failSilently = getInput(FAIL_SILENTLY_CONFIG_KEY);
 
-  logDebug(`Action input configuration:
-    ${AUTH_TOKEN_CONFIG_KEY}: ${authToken ?? ''},
-    ${ORGANIZATION_ID_CONFIG_KEY}: ${organizationId ?? ''},
-    ${SCAN_FILE_REF_CONFIG_KEY}: ${scanFileRef ?? ''},
-    ${IAC_TYPE_CONFIG_KEY}: ${iacType ?? ''},
-    ${IAC_VERSION_CONFIG_KEY}: ${iacVersion ?? ''},
-    ${SCAN_TIME_OUT_CONFIG_KEY}: ${scanTimeOut},
-    ${IGONRE_VIOLATIONS_CONFIG_KEY}: ${ignoreViolations ?? ''},
-    ${FAIL_SILENTLY_CONFIG_KEY}: ${failureCriteria ?? ''},
-    ${FAIL_SILENTLY_CONFIG_KEY}: ${failSilently ?? ''}
-  `);
-
-  return validateAndBuildConfig(
-    authToken,
-    organizationId,
-    scanFileRef,
-    iacType,
-    iacVersion,
-    scanTimeOut,
-    ignoreViolations,
-    failureCriteria,
-    failSilently,
-  );
-}
-
-/**
- * validateAndBuildConfig validates the action inputs and convert's them into InputConfiguration.
- */
-function validateAndBuildConfig(
-  authToken: string,
-  organizationID: string,
-  scanFileRef: string,
-  iacType: string,
-  iacVersion: string,
-  scanTimeOut?: string,
-  ignoreViolations?: string,
-  failureCriteria?: string,
-  failSilently?: string,
-): InputConfiguration {
-  let parsedScanTimeOut = DEFAULT_SCAN_TIME_OUT;
+  let parsedScanTimeOut = DEFAULT_SCAN_TIMEOUT;
   let parsedIgnoreViolations = DEFAULT_IGNORE_VIOLATIONS;
   let parsedFailureCriteria = validateAndParseFailureCriteria(DEFAULT_FAILURE_CRITERIA);
   let parsedFailSilently = DEFAULT_FAIL_SILENTLY;
 
   const errors = [];
-  try {
-    validateAuthToken(authToken);
-  } catch (err) {
-    errors.push(err);
+
+  if (organizationId == '') {
+    errors.push(Error(`${ORGANIZATION_ID_CONFIG_KEY} should not be empty.`));
   }
-  try {
-    validateOrgID(organizationID);
-  } catch (err) {
-    errors.push(err);
+
+  if (scanFileRef == '') {
+    errors.push(Error(`scan file ref should not be empty.`));
   }
-  try {
-    validateScanFileRef(scanFileRef);
-  } catch (err) {
-    errors.push(err);
+
+  if (iacVersion == '') {
+    errors.push(Error(`IaC version should not be empty.`));
   }
+
   try {
     validateIACType(iacType);
   } catch (err) {
     errors.push(err);
   }
-  try {
-    validateIACVersion(iacVersion);
-  } catch (err) {
-    errors.push(err);
-  }
+
   try {
     parsedScanTimeOut = validateAndParseScanTimeOut(scanTimeOut);
   } catch (err) {
     errors.push(err);
   }
+
   try {
     parsedIgnoreViolations = validateAndParseIgnoreViolations(ignoreViolations);
   } catch (err) {
     errors.push(err);
   }
+
   try {
     parsedFailureCriteria = validateAndParseFailureCriteria(failureCriteria);
   } catch (err) {
     errors.push(err);
   }
+
   try {
     parsedFailSilently = validateAndParseFailSilently(failSilently);
   } catch (err) {
     errors.push(err);
   }
+
   if (errors.length > 0) {
     let errMsg = `[Invalid Config] Violations:`;
     errors.forEach((error) => {
@@ -268,12 +211,11 @@ function validateAndBuildConfig(
   }
 
   return {
-    auth_token: authToken,
-    organization_id: organizationID,
+    organization_id: organizationId,
     scan_file_ref: scanFileRef,
     iac_type: iacType,
     iac_version: iacVersion,
-    scan_time_out: parsedScanTimeOut,
+    scan_timeout: parsedScanTimeOut,
     ignore_violations: parsedIgnoreViolations,
     failure_criteria: parsedFailureCriteria,
     fail_silently: parsedFailSilently,

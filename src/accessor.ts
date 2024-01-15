@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,11 +14,10 @@
  * limitations under the License.
  */
 
-import * as base64 from 'byte-base64';
-
 import { HttpClient } from '@actions/http-client';
+import { GoogleAuth } from 'google-auth-library';
 import { debug as logDebug } from '@actions/core';
-import { errorMessage } from '@google-github-actions/actions-utils';
+import { errorMessage, toBase64, fromBase64 } from '@google-github-actions/actions-utils';
 
 import {
   MAX_RETRIES_FOR_INITIATE_SCAN,
@@ -28,7 +27,6 @@ import {
 } from './commons/http_config';
 import { IACValidationException } from './exception';
 import { SCAN_FILE_MAX_SIZE_BYTES, USER_AGENT } from './commons/constants';
-import { isValidJSONFile } from './utils';
 
 export type PollOperationOptions = {
   retries: number;
@@ -124,13 +122,17 @@ export class IACAccessor {
   private readonly client: HttpClient;
 
   /**
+   * auth is the authentication client.
+   */
+  private readonly auth: GoogleAuth;
+
+  /**
    * retryCount denotes number of times an HTTP request has been retried by the accessor.
    */
   private retryCount: number;
 
   /**
    * @param baseURL IAC scanning API endpoint.
-   * @param accessToken Oauth2.0 access token, use to authenticate with IAC Scanning API's.
    * @param organizationId GCP organization Id of the customer, required to invoke IAC Scanning API.
    * @param scanTimeOut max time period for which scanning should be attempted.
    * @param scanStartTime timestamp in millis at which scanning was stared.
@@ -138,13 +140,15 @@ export class IACAccessor {
    */
   constructor(
     private readonly baseURL: string,
-    private readonly accessToken: string,
     private readonly organizationId: string,
     private readonly scanTimeOut: number,
     private readonly scanStartTime: number,
     private readonly version: string,
   ) {
     this.client = new HttpClient(USER_AGENT(version));
+    this.auth = new GoogleAuth({
+      scopes: ['https://www.googleapis.com/auth/cloud-platform'],
+    });
     this.retryCount = 0;
   }
 
@@ -152,9 +156,10 @@ export class IACAccessor {
     method: string,
     url: string,
     maxRetries: number,
+    errorMsg: string,
     data?: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   ) {
-    const authToken = this.accessToken;
+    const authToken = await this.auth.getAccessToken();
 
     const headers = {
       'Authorization': `Bearer ${authToken}`,
@@ -176,7 +181,10 @@ export class IACAccessor {
           continue;
         }
         if (statusCode >= 400) {
-          throw new IACValidationException(statusCode, '`(${statusCode}) ${body}`');
+          throw new IACValidationException(
+            statusCode,
+            `statusCode : (${statusCode}), message : ${body}`,
+          );
         }
         return JSON.parse(body);
       } catch (err) {
@@ -185,7 +193,8 @@ export class IACAccessor {
         if (err instanceof IACValidationException) {
           statusCode = (err as IACValidationException).getStatusCode();
         }
-        throw new IACValidationException(statusCode, `Failed to ${method} ${url}: ${msg}`);
+        logDebug(`Failed to ${method} ${url}: ${msg}`);
+        throw new IACValidationException(statusCode, `${errorMsg} ${msg}`);
       }
     }
     throw new IACValidationException(/* statusCode= */ 500, `Operation timed out`);
@@ -240,18 +249,12 @@ export class IACAccessor {
   }
 
   private validateIACValidationRequest(request: IACRequest) {
-    const tfPlanJSON = base64.base64ToBytes(request.iac.tf_plan);
+    const tfPlanJSON = new TextEncoder().encode(fromBase64(request.iac.tf_plan));
     if (tfPlanJSON.byteLength > SCAN_FILE_MAX_SIZE_BYTES) {
       throw new IACValidationException(
         /* statusCode= */ 400,
         `[Invalid Request] Violations : Found Scan File with size : ${tfPlanJSON.byteLength} Bytes,
        Max limit : ${SCAN_FILE_MAX_SIZE_BYTES} Bytes`,
-      );
-    }
-    if (!isValidJSONFile(tfPlanJSON)) {
-      throw new IACValidationException(
-        /* statusCode= */ 400,
-        `[Invalid Request] Violations : Scan File found to be Malformed JSON`,
       );
     }
   }
@@ -293,7 +296,12 @@ export class IACAccessor {
    */
   async getOperation(name: string): Promise<Operation> {
     const u = `${this.baseURL}/${name}`;
-    const resp: Operation = await this.request('GET', u, MAX_RETRIES_FOR_POLLING);
+    const resp: Operation = await this.request(
+      'GET',
+      u,
+      MAX_RETRIES_FOR_POLLING,
+      /*errorMsg=*/ 'encountered error while performing scan operation',
+    );
     return resp;
   }
 
@@ -302,12 +310,12 @@ export class IACAccessor {
    *
    * @param iac IAC file to scan.
    */
-  async scan(iac: Uint8Array): Promise<Violation[]> {
-    logDebug(`IAC scanning invoked at: ${this.scanStartTime}`);
+  async scan(iac: string): Promise<Violation[]> {
+    logDebug(`IaC scanning invoked at: ${this.scanStartTime}`);
     const request: IACRequest = {
       parent: this.organizationId,
       iac: {
-        tf_plan: base64.bytesToBase64(iac),
+        tf_plan: toBase64(iac),
       },
     };
     try {
@@ -315,14 +323,20 @@ export class IACAccessor {
       const u = this.baseURL + VALIDATE_ENDPOINT_PATH(this.organizationId);
       const body = JSON.stringify(request);
       logDebug(`Calling IAC Validation Service to start scanning.`);
-      const resp: Operation = await this.request('POST', u, MAX_RETRIES_FOR_INITIATE_SCAN, body);
+      const resp: Operation = await this.request(
+        'POST',
+        u,
+        MAX_RETRIES_FOR_INITIATE_SCAN,
+        /*errorMsg=*/ 'encountered error while requesting scan',
+        body,
+      );
       logDebug(`Operation to start scanning created, name: ${resp.name}`);
       // reset the retry count to zero
       this.retryCount = 0;
-      logDebug(`Polling IAC validation service for violations.`);
+      logDebug(`Polling IaC validation service for violations.`);
       const op = await this.pollOperation(resp.name);
       this.validatePollOperationResponse(op);
-      logDebug(`Received scanning response from IAC validation service.`);
+      logDebug(`Received scanning response from IaC validation service.`);
       return this.processIACValidationResponse(op);
     } catch (err) {
       let statusCode = 500;

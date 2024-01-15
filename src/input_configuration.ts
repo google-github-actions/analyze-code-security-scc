@@ -1,5 +1,5 @@
 /*
- * Copyright 2023 Google LLC
+ * Copyright 2024 Google LLC
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -31,12 +31,11 @@ export enum IACType {
 }
 
 export type InputConfiguration = {
-  auth_token: string;
   organization_id: string;
   scan_file_ref: string;
   iac_type: string;
   iac_version: string;
-  scan_time_out: number;
+  scan_timeout: number;
   ignore_violations: boolean;
   failure_criteria: FailureCriteria;
   fail_silently: boolean;
