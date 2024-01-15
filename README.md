@@ -7,7 +7,7 @@ Currently only terraform plan files are supported for scanning.
 
 ## Prerequisites
 
-* This action requires OAuth2.0 access token for authentication. The service account to which token belongs must have **Security Posture Shift-Left Validator or Security Posture Admin** Role on the Google Cloud organization to which IaC resources belong's. See [Authorization](#authorization) for more information.
+* This action requires a service account which have **Security Posture Shift-Left Validator or Security Posture Admin** Role on the Google Cloud organization to which IaC resources belong's. See [Authorization](#authorization) for more information.
 
 * This action runs using Node 20. If you are using self-hosted GitHub Actions
     runners, you must use a [runner
