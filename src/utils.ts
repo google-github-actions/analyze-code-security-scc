@@ -15,7 +15,7 @@
  */
 
 import { errorMessage, parseDuration } from '@google-github-actions/actions-utils/dist';
-import { FailureCriteria, IACType, Operator } from './input_configuration';
+import { FailureCriteria, Operator } from './input_configuration';
 import { Severity, Violation } from './accessor';
 import {
   DEFAULT_FAILURE_CRITERIA,
@@ -26,18 +26,6 @@ import {
   MIN_SCAN_TIMEOUT,
   SCAN_TIMEOUT_CONFIG_KEY,
 } from './commons/constants';
-
-/**
- * validateIACType decides whether given iac type is valid.
- */
-export function validateIACType(iac_type: string) {
-  if (isEmptyString(iac_type)) {
-    throw new Error(`IAC type should not be empty.`);
-  }
-  if (iac_type.toUpperCase() != IACType.TERRAFORM) {
-    throw new Error(`IAC type: ${iac_type} not supported`);
-  }
-}
 
 /**
  * validateAndParseScanTimeOut validates whether given string is valid timeout for scan.

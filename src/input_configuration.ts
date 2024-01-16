@@ -16,27 +16,27 @@
 
 import { Severity } from './accessor';
 
+/**
+ * FailureCriteria contains threshold for count of critical, high, medium, and
+ * low severity issues and AND/OR based aggregator to evaluate the criteria.
+ */
 export type FailureCriteria = {
   violationsThresholdBySeverity: Map<Severity, number>;
   operator: Operator;
 };
 
+/**
+ * AND/OR Operator to aggregate severity level evaluations to arrive at
+ * failure_criteria value.
+ */
 export enum Operator {
   OR = 'OR',
   AND = 'AND',
 }
 
+/**
+ * IaC Types supported by the action.
+ */
 export enum IACType {
   TERRAFORM = 'TERRAFORM',
 }
-
-export type InputConfiguration = {
-  organization_id: string;
-  scan_file_ref: string;
-  iac_type: string;
-  iac_version: string;
-  scan_timeout: number;
-  ignore_violations: boolean;
-  failure_criteria: FailureCriteria;
-  fail_silently: boolean;
-};

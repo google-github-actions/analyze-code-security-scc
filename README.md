@@ -27,7 +27,7 @@ jobs:
     - id: 'auth'
       uses: 'google-github-actions/auth@v2'
       with:
-        credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+        workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
         service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
     - id: 'analyze-code-security-scc'
@@ -82,7 +82,9 @@ and plugin dependency failure. Note: Action will always fail in case of any inpu
 
 ## Authorization
 
-You can authenticate this action via using [google-github-actions/auth](https://github.com/google-github-actions/auth) action. You can use [Service Account Key JSON][sa] authentication.
+Use [google-github-actions/auth](https://github.com/google-github-actions/auth)
+to authenticate the action. You can use [Workload Identity Federation][wif] or
+traditional [Service Account Key JSON][sa] authentication.
 
 ```yaml
 jobs:
@@ -95,7 +97,7 @@ jobs:
     - id: 'auth'
       uses: 'google-github-actions/auth@v2'
       with:
-        credentials_json: ${{ secrets.SERVICE_ACCOUNT_KEY }}
+        workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
         service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
     - id: 'analyze-code-security-scc'
@@ -103,3 +105,4 @@ jobs:
 ```
 
 [sa]: https://cloud.google.com/iam/docs/creating-managing-service-accounts
+[wif]: https://cloud.google.com/iam/docs/workload-identity-federation
