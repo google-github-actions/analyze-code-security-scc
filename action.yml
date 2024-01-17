@@ -1,0 +1,81 @@
+# Copyright 2024 Google LLC
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+name: 'analyze-code-security-scc'
+author: 'Google LLC'
+description: |-
+  Scan IaC files for security risks.
+
+inputs:
+  organization_id:
+    description: |-
+      Google Cloud OrganizationId which owns resources under modification.
+    required: true
+  scan_file_ref:
+    description: |-
+      Absolute file path including file name where the IaC file is stored in the workspace.
+      Ex: 'tf_plan.json', 'artifacts/tf_plan.json'.
+    required: true
+  iac_type:
+    description: |-
+      IaC template type. Currently only terraform is supported.
+    required: true
+  iac_version:
+    description: |-
+      IaC template version. Examples: '1.6.6', '1.6.5'.
+    required: true
+  scan_timeout:
+    description: |-
+      Max time upto which action should run, should be between '1m' and '10m'.
+    default: '1m'
+    required: false
+  ignore_violations:
+    description: |-
+      If set to true, violations found in IaC file will be ignored to determine build status.
+      Although violations will not be ignored to generate SARIF report and determining
+      iac_scan_result.
+    default: false
+    required: false
+  failure_criteria:
+    description: |-
+      Failure criteria evaluates workflow build status. It contains threshold for count of
+      critical, high, medium, and low severity issues and AND/OR based aggregator to evaluate
+      the criteria. The threshold for each severity is evaluated against count of issues with
+      similar severity in IaC scan result and then severity level evaluations are aggregated using
+      AND\OR to arrive at failure_criteria value.
+      If failure_criteria evaluates to true, workflow is marked as FAILED otherwise workflow is marked as SUCCESS.
+    default: 'Critical:1, High:1, Medium:1, Low:1, Operator:or'
+    required: false
+  fail_silently:
+    description: |-
+      If set to true, workflow will not fail in case of any internal error including invalid credentials
+      and plugin dependency failure.
+      Note: Action will always fail in case of any input validation failure.
+    default: false
+    required: false
+
+outputs:
+  iac_scan_result:
+    description: |-
+      Security Scan Result. One of:
+      `passed` - no violations found or failure_criteria was not satisfied.
+      `failed` - failure_criteria was satisfied.
+      `error` - Action ran into execution error, generally due to misconfiguration or invalid credentials.
+  iac_scan_result_sarif_path:
+    description: |-
+      Path for the SARIF Report file. This is only available when violations are found in the scan file.
+
+runs:
+  using: 'node20'
+  main: 'dist/main/index.js'
