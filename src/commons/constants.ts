@@ -35,7 +35,7 @@ export const IAC_VERSION_CONFIG_KEY = 'iac_version';
 export const IGONRE_VIOLATIONS_CONFIG_KEY = 'ignore_violations';
 export const FAILURE_CRITERIA_CONFIG_KEY = 'failure_criteria';
 export const FAIL_SILENTLY_CONFIG_KEY = 'fail_silently';
-export const SCAN_TIMEOUT_CONFIG_KEY = 'scan_time_out';
+export const SCAN_TIMEOUT_CONFIG_KEY = 'scan_timeout';
 export const ACTION_NAME = 'google-github-actions/analyze-code-security-scc';
 export const ACTION_FAIL_ERROR = (reason: string) => `${ACTION_NAME}, reason: ${reason}.`;
 export const IAC_SCAN_RESULT_OUTPUT_KEY = 'iac_scan_result';

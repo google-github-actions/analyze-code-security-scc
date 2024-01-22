@@ -25,23 +25,19 @@ import {
 
 import * as fs from 'fs/promises';
 
-import { errorMessage } from '@google-github-actions/actions-utils';
+import { errorMessage, parseBoolean, parseDuration } from '@google-github-actions/actions-utils';
 
-import { FailureCriteria, IACType, Operator } from './input_configuration';
-import {
-  getFailureCriteriasViolated,
-  getViolationCountBySeverity,
-  validateAndParseFailSilently,
-  validateAndParseFailureCriteria,
-  validateAndParseIgnoreViolations,
-  validateAndParseScanTimeOut,
-} from './utils';
-import { IACAccessor, Severity, Violation } from './accessor';
+import { IACType } from './input_configuration';
+import { isFailureCriteriaSatisfied, validateAndParseFailureCriteria } from './utils';
+import { IACAccessor, Violation } from './accessor';
 import { VALIDATE_ENDPOINT_DOMAIN } from './commons/http_config';
 import { SarifReportGenerator } from './reports/iac_scan_report_processor';
 import { IACScanReportProcessor } from './reports/iac_scan_report_processor';
 import {
   ACTION_FAIL_ERROR,
+  DEFAULT_FAIL_SILENTLY,
+  DEFAULT_IGNORE_VIOLATIONS,
+  DEFAULT_SCAN_TIMEOUT,
   FAILURE_CRITERIA_CONFIG_KEY,
   FAIL_SILENTLY_CONFIG_KEY,
   IAC_SCAN_RESULT,
@@ -49,6 +45,8 @@ import {
   IAC_TYPE_CONFIG_KEY,
   IAC_VERSION_CONFIG_KEY,
   IGONRE_VIOLATIONS_CONFIG_KEY,
+  MAX_SCAN_TIMEOUT,
+  MIN_SCAN_TIMEOUT,
   ORGANIZATION_ID_CONFIG_KEY,
   SARIF_REPORT_FILE_NAME,
   SCAN_FILE_REF_CONFIG_KEY,
@@ -67,9 +65,18 @@ async function run(): Promise<void> {
     const scanFileRef = getInput(SCAN_FILE_REF_CONFIG_KEY, { required: true });
     const iacType = getInput(IAC_TYPE_CONFIG_KEY, { required: true });
     const iacVersion = getInput(IAC_VERSION_CONFIG_KEY, { required: true });
-    const scanTimeOut = validateAndParseScanTimeOut(getInput(SCAN_TIMEOUT_CONFIG_KEY));
-    const ignoreViolations = validateAndParseIgnoreViolations(
+    let scanTimeOut = parseDuration(getInput(SCAN_TIMEOUT_CONFIG_KEY)) * 1000;
+    if (scanTimeOut == 0) {
+      scanTimeOut = DEFAULT_SCAN_TIMEOUT;
+    }
+    if (scanTimeOut > MAX_SCAN_TIMEOUT || scanTimeOut < MIN_SCAN_TIMEOUT) {
+      throw new Error(
+        `scan_timeout validation failed: expected ${SCAN_TIMEOUT_CONFIG_KEY} to be less than or equal to ${MAX_SCAN_TIMEOUT} and greater than or equal to ${MIN_SCAN_TIMEOUT}, found: ${scanTimeOut}`,
+      );
+    }
+    const ignoreViolations = parseBoolean(
       getInput(IGONRE_VIOLATIONS_CONFIG_KEY),
+      DEFAULT_IGNORE_VIOLATIONS,
     );
     const failureCriteria = validateAndParseFailureCriteria(getInput(FAILURE_CRITERIA_CONFIG_KEY));
 
@@ -117,7 +124,7 @@ async function run(): Promise<void> {
     const msg = errorMessage(err);
     setOutput(IAC_SCAN_RESULT_OUTPUT_KEY, IAC_SCAN_RESULT.ERROR);
     // if config is not found or `fail_silently` is configured to false fail the build.
-    const failSilently = validateAndParseFailSilently(getInput(FAIL_SILENTLY_CONFIG_KEY));
+    const failSilently = parseBoolean(getInput(FAIL_SILENTLY_CONFIG_KEY), DEFAULT_FAIL_SILENTLY);
     if (!failSilently) {
       setFailed(ACTION_FAIL_ERROR(`failing build due to internal error: ${msg}`));
     } else {
@@ -126,30 +133,6 @@ async function run(): Promise<void> {
       );
     }
   }
-}
-
-/**
- * isFailureCriteriaSatisfied decides if the failure criteria was satisfied.
- *
- * It decides this on the basis of configuration customer has set in their workflow and the violations
- * present in their plan file.
- */
-function isFailureCriteriaSatisfied(
-  failure_criteria: FailureCriteria,
-  violations: Violation[],
-): boolean {
-  const violationsCountBySeverity: Map<Severity, number> = getViolationCountBySeverity(violations);
-  logDebug(`Violations count by Severity: ${[...violationsCountBySeverity.entries()]}`);
-  const violationsThresholdBySeverity = failure_criteria.violationsThresholdBySeverity;
-  const failureCriteriasViolated: boolean[] = getFailureCriteriasViolated(
-    violationsCountBySeverity,
-    violationsThresholdBySeverity,
-  );
-  const operator: Operator = failure_criteria.operator;
-
-  if (operator == Operator.AND) {
-    return failureCriteriasViolated.reduce((acc, currentValue) => acc && currentValue, true);
-  } else return failureCriteriasViolated.reduce((acc, currentValue) => acc || currentValue, false);
 }
 
 run();
