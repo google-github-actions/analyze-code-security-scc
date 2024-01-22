@@ -16,7 +16,7 @@
 
 import { debug as logDebug } from '@actions/core';
 
-import { errorMessage } from '@google-github-actions/actions-utils/dist';
+import { errorMessage } from '@google-github-actions/actions-utils';
 import { FailureCriteria, Operator } from './input_configuration';
 import { Severity, Violation } from './accessor';
 import { DEFAULT_FAILURE_CRITERIA } from './commons/constants';
@@ -66,7 +66,9 @@ export function isFailureCriteriaSatisfied(
 
   if (operator == Operator.AND) {
     return failureCriteriasViolated.reduce((acc, currentValue) => acc && currentValue, true);
-  } else return failureCriteriasViolated.reduce((acc, currentValue) => acc || currentValue, false);
+  } else {
+    return failureCriteriasViolated.reduce((acc, currentValue) => acc || currentValue, false);
+  }
 }
 
 /**

@@ -65,13 +65,14 @@ async function run(): Promise<void> {
     const scanFileRef = getInput(SCAN_FILE_REF_CONFIG_KEY, { required: true });
     const iacType = getInput(IAC_TYPE_CONFIG_KEY, { required: true });
     const iacVersion = getInput(IAC_VERSION_CONFIG_KEY, { required: true });
-    let scanTimeOut = parseDuration(getInput(SCAN_TIMEOUT_CONFIG_KEY)) * 1000;
-    if (scanTimeOut == 0) {
-      scanTimeOut = DEFAULT_SCAN_TIMEOUT;
-    }
-    if (scanTimeOut > MAX_SCAN_TIMEOUT || scanTimeOut < MIN_SCAN_TIMEOUT) {
+    const scanTimeoutInput = getInput(SCAN_TIMEOUT_CONFIG_KEY);
+    const scanTimeoutMs = parseDuration(scanTimeoutInput) * 1000 || DEFAULT_SCAN_TIMEOUT;
+    if (
+      scanTimeoutMs > parseDuration(MAX_SCAN_TIMEOUT) * 1000 ||
+      scanTimeoutMs < parseDuration(MIN_SCAN_TIMEOUT) * 1000
+    ) {
       throw new Error(
-        `scan_timeout validation failed: expected ${SCAN_TIMEOUT_CONFIG_KEY} to be less than or equal to ${MAX_SCAN_TIMEOUT} and greater than or equal to ${MIN_SCAN_TIMEOUT}, found: ${scanTimeOut}`,
+        `invalid input received for ${SCAN_TIMEOUT_CONFIG_KEY}: ${scanTimeoutInput} - ${SCAN_TIMEOUT_CONFIG_KEY} must be between ${MIN_SCAN_TIMEOUT} and ${MAX_SCAN_TIMEOUT}`,
       );
     }
     const ignoreViolations = parseBoolean(
@@ -92,7 +93,7 @@ async function run(): Promise<void> {
     const accessor = new IACAccessor(
       VALIDATE_ENDPOINT_DOMAIN,
       organizationId,
-      scanTimeOut,
+      scanTimeoutMs,
       scanStartTime,
       version,
     );
