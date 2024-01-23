@@ -85,6 +85,9 @@ jobs:
           iac_type: 'terraform'
           iac_version: '1.0.0'
           failure_criteria: 'CRITICAL:2, Operator:OR'
+          ignore_violations: 'false'
+          fail_silently: 'false'
+          scan_timeout: '1m'
       - name: Check scan result and compare sarif report generated.
         run: |
           report_expected=$(cat test/resources/sarif.json)
