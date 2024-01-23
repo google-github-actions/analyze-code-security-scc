@@ -58,10 +58,10 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
-    runs-on: ubuntu-latest
+    runs-on: 'ubuntu-latest'
 
     env:
-      ORGANIZATION_ID: 777838403257
+      ORGANIZATION_ID: '777838403257'
     
     steps:
       - uses: 'actions/checkout@v4'
@@ -80,9 +80,9 @@ jobs:
 
       - id: 'violations-found'
         name: 'Violations found in plan file'
-        uses: ./
+        uses: './'
         with:
-          organization_id: $ORGANIZATION_ID
+          organization_id: '${{ env.ORGANIZATION_ID }}'
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
@@ -104,9 +104,9 @@ jobs:
 
       - id: 'no-violations-found'
         name: 'No violations found in plan file'
-        uses: ./
+        uses: './'
         with:
-          organization_id: $ORGANIZATION_ID
+          organization_id: '${{ env.ORGANIZATION_ID }}'
           scan_file_ref: 'test/resources/no-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
@@ -122,9 +122,9 @@ jobs:
     
       - id: 'failure-criteria-satisfied'
         name: 'Failure criteria satisfied'
-        uses: ./
+        uses: './'
         with:
-          organization_id: $ORGANIZATION_ID
+          organization_id: '${{ env.ORGANIZATION_ID }}'
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
@@ -142,9 +142,9 @@ jobs:
 
       - id: 'failure-criteria-satisfied-ignore-violations-true'
         name: 'Failure criteria satisfied, ignore violations true'
-        uses: ./
+        uses: './'
         with:
-          organization_id: $ORGANIZATION_ID
+          organization_id: '${{ env.ORGANIZATION_ID }}'
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
@@ -159,7 +159,7 @@ jobs:
       
       - id: 'action-internal-error'
         name: 'Action internal error'
-        uses: ./
+        uses: './'
         with:
           # Invalid org id, will cause an internal error in action
           organization_id: 'invalid-id'
@@ -178,7 +178,7 @@ jobs:
 
       - id: 'action-internal-error-fail-silently-true'
         name: 'Action internal error, fail silently true'
-        uses: ./
+        uses: './'
         with:
           organization_id: 'invalid-id'
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
