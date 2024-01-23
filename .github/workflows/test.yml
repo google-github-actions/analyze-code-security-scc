@@ -61,7 +61,7 @@ jobs:
     runs-on: ubuntu-latest
 
     env:
-      ORGANIZATION_ID: '777838403257'
+      ORGANIZATION_ID: 777838403257
     
     steps:
       - uses: 'actions/checkout@v4'
