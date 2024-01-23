@@ -1,0 +1,503 @@
+{
+    "format_version": "1.2",
+    "terraform_version": "1.6.0",
+    "planned_values": {
+      "root_module": {
+        "resources": [
+          {
+            "address": "google_container_node_pool.good_node_pool",
+            "mode": "managed",
+            "type": "google_container_node_pool",
+            "name": "good_node_pool",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "schema_version": 1,
+            "values": {
+              "autoscaling": [],
+              "cluster": "my-cluster-1",
+              "initial_node_count": 3,
+              "name": "my-good-node-pool-1",
+              "node_config": [
+                {
+                  "advanced_machine_features": [],
+                  "boot_disk_kms_key": null,
+                  "ephemeral_storage_local_ssd_config": [],
+                  "fast_socket": [],
+                  "gcfs_config": [],
+                  "gvnic": [],
+                  "host_maintenance_policy": [],
+                  "kubelet_config": [],
+                  "linux_node_config": [],
+                  "local_nvme_ssd_block_config": [],
+                  "machine_type": "e2-medium",
+                  "node_group": null,
+                  "preemptible": true,
+                  "reservation_affinity": [],
+                  "resource_labels": null,
+                  "sole_tenant_config": [],
+                  "spot": false,
+                  "tags": null,
+                  "taint": []
+                }
+              ],
+              "placement_policy": [],
+              "project": "tf-deployer",
+              "timeouts": null
+            },
+            "sensitive_values": {
+              "autoscaling": [],
+              "instance_group_urls": [],
+              "managed_instance_group_urls": [],
+              "management": [],
+              "network_config": [],
+              "node_config": [
+                {
+                  "advanced_machine_features": [],
+                  "confidential_nodes": [],
+                  "effective_taints": [],
+                  "ephemeral_storage_local_ssd_config": [],
+                  "fast_socket": [],
+                  "gcfs_config": [],
+                  "guest_accelerator": [],
+                  "gvnic": [],
+                  "host_maintenance_policy": [],
+                  "kubelet_config": [],
+                  "labels": {},
+                  "linux_node_config": [],
+                  "local_nvme_ssd_block_config": [],
+                  "metadata": {},
+                  "oauth_scopes": [],
+                  "reservation_affinity": [],
+                  "shielded_instance_config": [],
+                  "sole_tenant_config": [],
+                  "taint": [],
+                  "workload_metadata_config": []
+                }
+              ],
+              "node_locations": [],
+              "placement_policy": [],
+              "upgrade_settings": []
+            }
+          },
+          {
+            "address": "google_container_node_pool.my_bad_node_pool_in_project1",
+            "mode": "managed",
+            "type": "google_container_node_pool",
+            "name": "my_bad_node_pool_in_project1",
+            "provider_name": "registry.terraform.io/hashicorp/google",
+            "schema_version": 1,
+            "values": {
+              "autoscaling": [],
+              "cluster": "my-cluster-1",
+              "initial_node_count": 2,
+              "name": "my-bad-node-pool-1",
+              "node_config": [
+                {
+                  "advanced_machine_features": [],
+                  "boot_disk_kms_key": null,
+                  "ephemeral_storage_local_ssd_config": [],
+                  "fast_socket": [],
+                  "gcfs_config": [],
+                  "gvnic": [],
+                  "host_maintenance_policy": [],
+                  "kubelet_config": [],
+                  "linux_node_config": [],
+                  "local_nvme_ssd_block_config": [],
+                  "machine_type": "e2-medium",
+                  "node_group": null,
+                  "preemptible": true,
+                  "reservation_affinity": [],
+                  "resource_labels": null,
+                  "sole_tenant_config": [],
+                  "spot": false,
+                  "tags": null,
+                  "taint": []
+                }
+              ],
+              "placement_policy": [],
+              "project": "tf-deployer",
+              "timeouts": null
+            },
+            "sensitive_values": {
+              "autoscaling": [],
+              "instance_group_urls": [],
+              "managed_instance_group_urls": [],
+              "management": [],
+              "network_config": [],
+              "node_config": [
+                {
+                  "advanced_machine_features": [],
+                  "confidential_nodes": [],
+                  "effective_taints": [],
+                  "ephemeral_storage_local_ssd_config": [],
+                  "fast_socket": [],
+                  "gcfs_config": [],
+                  "guest_accelerator": [],
+                  "gvnic": [],
+                  "host_maintenance_policy": [],
+                  "kubelet_config": [],
+                  "labels": {},
+                  "linux_node_config": [],
+                  "local_nvme_ssd_block_config": [],
+                  "metadata": {},
+                  "oauth_scopes": [],
+                  "reservation_affinity": [],
+                  "shielded_instance_config": [],
+                  "sole_tenant_config": [],
+                  "taint": [],
+                  "workload_metadata_config": []
+                }
+              ],
+              "node_locations": [],
+              "placement_policy": [],
+              "upgrade_settings": []
+            }
+          }
+        ]
+      }
+    },
+    "resource_changes": [
+      {
+        "address": "google_container_node_pool.good_node_pool",
+        "mode": "managed",
+        "type": "google_container_node_pool",
+        "name": "good_node_pool",
+        "provider_name": "registry.terraform.io/hashicorp/google",
+        "change": {
+          "actions": [
+            "create"
+          ],
+          "before": null,
+          "after": {
+            "autoscaling": [],
+            "cluster": "my-cluster-1",
+            "initial_node_count": 3,
+            "name": "my-good-node-pool-1",
+            "node_config": [
+              {
+                "advanced_machine_features": [],
+                "boot_disk_kms_key": null,
+                "ephemeral_storage_local_ssd_config": [],
+                "fast_socket": [],
+                "gcfs_config": [],
+                "gvnic": [],
+                "host_maintenance_policy": [],
+                "kubelet_config": [],
+                "linux_node_config": [],
+                "local_nvme_ssd_block_config": [],
+                "machine_type": "e2-medium",
+                "node_group": null,
+                "preemptible": true,
+                "reservation_affinity": [],
+                "resource_labels": null,
+                "sole_tenant_config": [],
+                "spot": false,
+                "tags": null,
+                "taint": []
+              }
+            ],
+            "placement_policy": [],
+            "project": "tf-deployer",
+            "timeouts": null
+          },
+          "after_unknown": {
+            "autoscaling": [],
+            "id": true,
+            "instance_group_urls": true,
+            "location": true,
+            "managed_instance_group_urls": true,
+            "management": true,
+            "max_pods_per_node": true,
+            "name_prefix": true,
+            "network_config": true,
+            "node_config": [
+              {
+                "advanced_machine_features": [],
+                "confidential_nodes": true,
+                "disk_size_gb": true,
+                "disk_type": true,
+                "effective_taints": true,
+                "ephemeral_storage_local_ssd_config": [],
+                "fast_socket": [],
+                "gcfs_config": [],
+                "guest_accelerator": true,
+                "gvnic": [],
+                "host_maintenance_policy": [],
+                "image_type": true,
+                "kubelet_config": [],
+                "labels": true,
+                "linux_node_config": [],
+                "local_nvme_ssd_block_config": [],
+                "local_ssd_count": true,
+                "logging_variant": true,
+                "metadata": true,
+                "min_cpu_platform": true,
+                "oauth_scopes": true,
+                "reservation_affinity": [],
+                "service_account": true,
+                "shielded_instance_config": true,
+                "sole_tenant_config": [],
+                "taint": [],
+                "workload_metadata_config": true
+              }
+            ],
+            "node_count": true,
+            "node_locations": true,
+            "operation": true,
+            "placement_policy": [],
+            "upgrade_settings": true,
+            "version": true
+          },
+          "before_sensitive": false,
+          "after_sensitive": {
+            "autoscaling": [],
+            "instance_group_urls": [],
+            "managed_instance_group_urls": [],
+            "management": [],
+            "network_config": [],
+            "node_config": [
+              {
+                "advanced_machine_features": [],
+                "confidential_nodes": [],
+                "effective_taints": [],
+                "ephemeral_storage_local_ssd_config": [],
+                "fast_socket": [],
+                "gcfs_config": [],
+                "guest_accelerator": [],
+                "gvnic": [],
+                "host_maintenance_policy": [],
+                "kubelet_config": [],
+                "labels": {},
+                "linux_node_config": [],
+                "local_nvme_ssd_block_config": [],
+                "metadata": {},
+                "oauth_scopes": [],
+                "reservation_affinity": [],
+                "shielded_instance_config": [],
+                "sole_tenant_config": [],
+                "taint": [],
+                "workload_metadata_config": []
+              }
+            ],
+            "node_locations": [],
+            "placement_policy": [],
+            "upgrade_settings": []
+          }
+        }
+      },
+      {
+        "address": "google_container_node_pool.my_bad_node_pool_in_project1",
+        "mode": "managed",
+        "type": "google_container_node_pool",
+        "name": "my_bad_node_pool_in_project1",
+        "provider_name": "registry.terraform.io/hashicorp/google",
+        "change": {
+          "actions": [
+            "create"
+          ],
+          "before": null,
+          "after": {
+            "autoscaling": [],
+            "cluster": "my-cluster-1",
+            "initial_node_count": 2,
+            "name": "my-bad-node-pool-1",
+            "node_config": [
+              {
+                "advanced_machine_features": [],
+                "boot_disk_kms_key": null,
+                "ephemeral_storage_local_ssd_config": [],
+                "fast_socket": [],
+                "gcfs_config": [],
+                "gvnic": [],
+                "host_maintenance_policy": [],
+                "kubelet_config": [],
+                "linux_node_config": [],
+                "local_nvme_ssd_block_config": [],
+                "machine_type": "e2-medium",
+                "node_group": null,
+                "preemptible": true,
+                "reservation_affinity": [],
+                "resource_labels": null,
+                "sole_tenant_config": [],
+                "spot": false,
+                "tags": null,
+                "taint": []
+              }
+            ],
+            "placement_policy": [],
+            "project": "tf-deployer",
+            "timeouts": null
+          },
+          "after_unknown": {
+            "autoscaling": [],
+            "id": true,
+            "instance_group_urls": true,
+            "location": true,
+            "managed_instance_group_urls": true,
+            "management": true,
+            "max_pods_per_node": true,
+            "name_prefix": true,
+            "network_config": true,
+            "node_config": [
+              {
+                "advanced_machine_features": [],
+                "confidential_nodes": true,
+                "disk_size_gb": true,
+                "disk_type": true,
+                "effective_taints": true,
+                "ephemeral_storage_local_ssd_config": [],
+                "fast_socket": [],
+                "gcfs_config": [],
+                "guest_accelerator": true,
+                "gvnic": [],
+                "host_maintenance_policy": [],
+                "image_type": true,
+                "kubelet_config": [],
+                "labels": true,
+                "linux_node_config": [],
+                "local_nvme_ssd_block_config": [],
+                "local_ssd_count": true,
+                "logging_variant": true,
+                "metadata": true,
+                "min_cpu_platform": true,
+                "oauth_scopes": true,
+                "reservation_affinity": [],
+                "service_account": true,
+                "shielded_instance_config": true,
+                "sole_tenant_config": [],
+                "taint": [],
+                "workload_metadata_config": true
+              }
+            ],
+            "node_count": true,
+            "node_locations": true,
+            "operation": true,
+            "placement_policy": [],
+            "upgrade_settings": true,
+            "version": true
+          },
+          "before_sensitive": false,
+          "after_sensitive": {
+            "autoscaling": [],
+            "instance_group_urls": [],
+            "managed_instance_group_urls": [],
+            "management": [],
+            "network_config": [],
+            "node_config": [
+              {
+                "advanced_machine_features": [],
+                "confidential_nodes": [],
+                "effective_taints": [],
+                "ephemeral_storage_local_ssd_config": [],
+                "fast_socket": [],
+                "gcfs_config": [],
+                "guest_accelerator": [],
+                "gvnic": [],
+                "host_maintenance_policy": [],
+                "kubelet_config": [],
+                "labels": {},
+                "linux_node_config": [],
+                "local_nvme_ssd_block_config": [],
+                "metadata": {},
+                "oauth_scopes": [],
+                "reservation_affinity": [],
+                "shielded_instance_config": [],
+                "sole_tenant_config": [],
+                "taint": [],
+                "workload_metadata_config": []
+              }
+            ],
+            "node_locations": [],
+            "placement_policy": [],
+            "upgrade_settings": []
+          }
+        }
+      }
+    ],
+    "configuration": {
+      "provider_config": {
+        "google": {
+          "name": "google",
+          "full_name": "registry.terraform.io/hashicorp/google",
+          "expressions": {
+            "credentials": {},
+            "region": {
+              "constant_value": "us-central1"
+            },
+            "zone": {
+              "constant_value": "us-central1-c"
+            }
+          }
+        }
+      },
+      "root_module": {
+        "resources": [
+          {
+            "address": "google_container_node_pool.good_node_pool",
+            "mode": "managed",
+            "type": "google_container_node_pool",
+            "name": "good_node_pool",
+            "provider_config_key": "google",
+            "expressions": {
+              "cluster": {
+                "constant_value": "my-cluster-1"
+              },
+              "initial_node_count": {
+                "constant_value": 3
+              },
+              "name": {
+                "constant_value": "my-good-node-pool-1"
+              },
+              "node_config": [
+                {
+                  "machine_type": {
+                    "constant_value": "e2-medium"
+                  },
+                  "preemptible": {
+                    "constant_value": true
+                  }
+                }
+              ],
+              "project": {
+                "constant_value": "tf-deployer"
+              }
+            },
+            "schema_version": 1
+          },
+          {
+            "address": "google_container_node_pool.my_bad_node_pool_in_project1",
+            "mode": "managed",
+            "type": "google_container_node_pool",
+            "name": "my_bad_node_pool_in_project1",
+            "provider_config_key": "google",
+            "expressions": {
+              "cluster": {
+                "constant_value": "my-cluster-1"
+              },
+              "initial_node_count": {
+                "constant_value": 2
+              },
+              "name": {
+                "constant_value": "my-bad-node-pool-1"
+              },
+              "node_config": [
+                {
+                  "machine_type": {
+                    "constant_value": "e2-medium"
+                  },
+                  "preemptible": {
+                    "constant_value": true
+                  }
+                }
+              ],
+              "project": {
+                "constant_value": "tf-deployer"
+              }
+            },
+            "schema_version": 1
+          }
+        ]
+      }
+    },
+    "timestamp": "2024-01-05T09:14:14Z",
+    "errored": false
+  }

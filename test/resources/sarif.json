@@ -1,0 +1,109 @@
+{
+    "version": "2.1.0",
+    "$schema": "https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json",
+    "runs": [
+      {
+        "tool": {
+          "driver": {
+            "name": "analyze-code-security-scc",
+            "version": "1.0.0",
+            "informationUri": "",
+            "rules": [
+              {
+                "id": "folders/123456/policies/custom.publicBucketACL",
+                "fullDescription": {
+                  "text": "detailed description"
+                },
+                "properties": {
+                  "severity": "CRITICAL",
+                  "policyType": "ORG_POLICY_CUSTOM",
+                  "complianceStandard": [
+                    "CIS 2.0 1.15",
+                    "NIST 1.5"
+                  ],
+                  "policySet": "my-policy-set-1",
+                  "posture": "organizations/777838403257/locations/global/postures/posture1",
+                  "postureRevisionId": "rev1",
+                  "postureDeploymentId": "organizations/777838403257/locations/global/postureDeployments/pd1",
+                  "constraints": "some json representation of constraint",
+                  "nextSteps": "You can fix this by following Step 1, Step 2 and Step 3"
+                }
+              },
+              {
+                "id": "folders/123456/policies/custom.uniformBucketLevelAccess",
+                "fullDescription": {
+                  "text": "detailed description"
+                },
+                "properties": {
+                  "severity": "LOW",
+                  "policyType": "ORG_POLICY_CUSTOM",
+                  "complianceStandard": [
+                    "NIST 3"
+                  ],
+                  "constraints": "some json representation of constraint"
+                }
+              }
+            ]
+          }
+        },
+        "results": [
+          {
+            "ruleId": "folders/123456/policies/custom.publicBucketACL",
+            "message": {
+              "text": "Asset type: storage.googleapis.com/Bucket has a violation, next steps: You can fix this by following Step 1, Step 2 and Step 3"
+            },
+            "locations": [
+              {
+                "logicalLocations": [
+                  {
+                    "fullyQualifiedName": "storage.googleapis.com/buckets/b1"
+                  }
+                ]
+              }
+            ],
+            "properties": {
+              "assetId": "storage.googleapis.com/buckets/b1",
+              "asset": "some json representation of asset",
+              "assetType": "storage.googleapis.com/Bucket"
+            }
+          },
+          {
+            "ruleId": "folders/123456/policies/custom.uniformBucketLevelAccess",
+            "message": {
+              "text": "Asset type:  has a violation, next steps: "
+            },
+            "locations": [
+              {
+                "logicalLocations": [
+                  {
+                    "fullyQualifiedName": "storage.googleapis.com/buckets/b2"
+                  }
+                ]
+              }
+            ],
+            "properties": {
+              "assetId": "storage.googleapis.com/buckets/b2"
+            }
+          },
+          {
+            "ruleId": "folders/123456/policies/custom.uniformBucketLevelAccess",
+            "message": {
+              "text": "Asset type:  has a violation, next steps: "
+            },
+            "locations": [
+              {
+                "logicalLocations": [
+                  {
+                    "fullyQualifiedName": "storage.googleapis.com/buckets/b3"
+                  }
+                ]
+              }
+            ],
+            "properties": {
+              "assetId": "storage.googleapis.com/buckets/b3"
+            }
+          }
+        ]
+      }
+    ]
+  }

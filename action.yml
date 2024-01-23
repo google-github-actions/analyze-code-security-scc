@@ -20,61 +20,65 @@ description: |-
 inputs:
   organization_id:
     description: |-
-      Google Cloud OrganizationId which owns resources under modification.
+      The Google Cloud organization ID for the organization which includes 
+      the resources that you want to modify.
     required: true
   scan_file_ref:
     description: |-
-      Absolute file path including file name where the IaC file is stored in the workspace.
-      Ex: 'tf_plan.json', 'artifacts/tf_plan.json'.
+      The absolute file path, including the file name, for the IaC file in the 
+      workspace. For example: './tf_plan.json', or './artifacts/tf_plan.json'.
     required: true
   iac_type:
     description: |-
-      IaC template type. Currently only terraform is supported.
+      The IaC template type. Currently only Terraform is supported.
     required: true
   iac_version:
     description: |-
-      IaC template version. Examples: '1.6.6', '1.6.5'.
+      The IaC template version. For example: '1.6.6', or '1.6.5'.
     required: true
   scan_timeout:
     description: |-
-      Max time upto which action should run, should be between '1m' and '10m'.
+      The maximum time before the action stops. The time must be between '1m' and '10m'. 
     default: '1m'
     required: false
   ignore_violations:
     description: |-
-      If set to true, violations found in IaC file will be ignored to determine build status.
-      Although violations will not be ignored to generate SARIF report and determining
-      iac_scan_result.
+      Whether violations found in IaC file should be ignored when determining 
+      the build status. This input doesn’t apply to  violations that are 
+      related to generating SARIF reports and determining the `iac_scan_result`. 
     default: false
     required: false
   failure_criteria:
     description: |-
-      Failure criteria evaluates workflow build status. It contains threshold for count of
-      critical, high, medium, and low severity issues and AND/OR based aggregator to evaluate
-      the criteria. The threshold for each severity is evaluated against count of issues with
-      similar severity in IaC scan result and then severity level evaluations are aggregated using
-      AND\OR to arrive at failure_criteria value.
-      If failure_criteria evaluates to true, workflow is marked as FAILED otherwise workflow is marked as SUCCESS.
-    default: 'Critical:1, High:1, Medium:1, Low:1, Operator:or'
+      The failure criteria that determines the workflow build status. You can set 
+      a threshold for the number of critical, high, medium, and low severity 
+      issues and use an aggregator  (either `and` or `or`) to evaluate the criteria. 
+      To determine whether a build has failed, the threshold for each severity is 
+      evaluated against the count of issues with that severity in the IaC scan 
+      results and then severity level evaluations are aggregated using `AND` or `OR` 
+      to arrive at `failure_criteria` value.
+      If the `failure_criteria` evaluates to `true`, the workflow is marked as `FAILED`. 
+      Otherwise, the workflow is marked as `SUCCESS`.
+    default: 'Critical:1, High:1, Medium:1, Low:1, Operator:OR'
     required: false
   fail_silently:
     description: |-
-      If set to true, workflow will not fail in case of any internal error including invalid credentials
-      and plugin dependency failure.
-      Note: Action will always fail in case of any input validation failure.
+      If set to true, workflow will not fail in case of any internal error including 
+      invalid credentials and plugin dependency failure. 
+      Note: Action will always fail in case of any input validationfailure.
     default: false
     required: false
 
 outputs:
   iac_scan_result:
     description: |-
-      Security Scan Result. One of:
-      `passed` - no violations found or failure_criteria was not satisfied.
-      `failed` - failure_criteria was satisfied.
-      `error` - Action ran into execution error, generally due to misconfiguration or invalid credentials.
+      The result of the security scan. One of:
+      `passed` - No violations were found or the `failure_criteria` was not satisfied.
+      `failed` - The `failure_criteria` was satisfied.
+      `error` - The action ran into an execution error, generally due to a misconfiguration or invalid credentials.
   iac_scan_result_sarif_path:
     description: |-
-      Path for the SARIF Report file. This is only available when violations are found in the scan file.
+      The path for the SARIF report file. This file is only available when violations are found in the scan file.
 
 runs:
   using: 'node20'

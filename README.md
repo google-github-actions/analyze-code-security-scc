@@ -2,20 +2,30 @@
 
 ## Description
 
-This Github Action scans Infrastructure as Code (IaC) files for security risks. When a scan finds violations, this action will write the report in SARIF format to the workspace.
-Currently only terraform plan files are supported for scanning.
+This Github action identifies insecure configurations in Infrastructure as Code (IaC) files for Google Cloud resources. 
+This action requires Terraform plan files in JSON format for scanning.
+
+Use this action to detect and remediate issues in IaC files for Google Cloud before you deploy the resources.
+
+This action lets you:
+- Scan IaC template files (such as Terraform plan files).
+- Display issues with their severity as a SARIF Report in the GitHub Workspace after a scan completes.
+- Define severity-based failure criteria for passing or failing the build.
+
+> [!NOTE] 
+> This is a Security Command Center Premium tier offering for subscription customers only. You must activate the Security Command Center Premium tier in the Google Cloud organization to use this feature.
 
 ## Prerequisites
 
--   This action requires a service account which have **Security Posture
-    Shift-Left Validator or Security Posture Admin** Role on the Google Cloud
-    organization to which IaC resources belong's. See
-    [Authorization](#authorization) for more information.
+-   This action requires a Google Cloud service account which has the 
+    **Security Posture Shift-Left Validator** role or the **Security 
+    Posture Admin** role on the Google Cloud organization that includes 
+    the IaC resources. For more information, see [Authorization](#authorization).
 
 -   This action runs using Node 20. If you are using self-hosted GitHub Actions
     runners, you must use a [runner
     version](https://github.com/actions/virtual-environments) that supports this
-    version or newer.
+    version or later.
 
 ## Usage
 
@@ -54,34 +64,38 @@ jobs:
 
 ## Inputs
 
--   `organization_id`: (Required) ID of the Google Cloud organization which owns
-    resources under modification.
+-   `organization_id`: (Required) The Google Cloud organization ID for the 
+    organization which includes the resources that you want to modify.
 
--   `scan_file_ref`: (Required) Absolute file path including file name where the
-    IaC file is stored in the workspace. Examples: 'tf_plan.json',
-    'artifacts/tf_plan.json'.
+-   `scan_file_ref`: (Required) The absolute file path, including the file name, 
+    for the IaC file in the workspace. For example: './tf_plan.json', or 
+    './artifacts/tf_plan.json'.
 
--   `iac_type`: (Required) IaC template type. Currently only Terraform is
+-   `iac_type`: (Required) The IaC template type. Currently only Terraform is
     supported.
 
--   `iac_version`: (Required) IaC template version. Examples: '1.6.6', '1.6.5'.
+-   `iac_version`: (Required) The IaC template version. For example: '1.6.6', 
+    or '1.6.5'.
 
--   `scan_timeout`: (Optional) Max time upto which action should run, should be
-    between '1m' and '10m'. Default: 1m.
+-   `scan_timeout`: (Optional) The maximum time before the action stops. 
+    The time must be between '1m' and '10m'. The default is `1m`.
 
--   `ignore_violations`: (Optional) If set to true, violations found in IaC file
-    will be ignored to determine build status. Although violations will not be
-    ignored to generate SARIF report and determining iac_scan_result. Default:
-    false.
+-   `ignore_violations`: (Optional) Whether violations found in IaC file 
+    should be ignored when determining the build status. This input doesn’t 
+    apply to  violations that are related to generating SARIF reports and 
+    determining the `iac_scan_result`. The default is `false`.
 
--   `failure_criteria`: (Optional) Failure criteria evaluates workflow build
-    status. It contains threshold for count of critical, high, medium, and low
-    severity issues and `AND/OR` based aggregator to evaluate the criteria. The
-    threshold for each severity is evaluated against count of issues with
-    similar severity in IaC scan result and then severity level evaluations are
-    aggregated using `AND\OR` to arrive at failure_criteria value.
+-   `failure_criteria`: (Optional) The failure criteria that determines the 
+    workflow build status. You can set a threshold for the number of critical, 
+    high, medium, and low severity issues and use an aggregator  (either `and` 
+    or `or`) to evaluate the criteria. To determine whether a build has failed, 
+    the threshold for each severity is evaluated against the count of issues 
+    with that severity in the IaC scan results and then severity level evaluations 
+    are aggregated using `AND` or `OR` to arrive at `failure_criteria` value.
 
-    If `failure_criteria` evaluates to true, workflow is marked as `FAILED` otherwise workflow is marked as `SUCCESS`. Default: "Critical:1, High:1, Medium:1, Low:1, Operator:or".
+    If the `failure_criteria` evaluates to `true`, the workflow is marked as 
+    `FAILED`. Otherwise, the workflow is marked as `SUCCESS`. The default is 
+    "Critical:1, High:1, Medium:1, Low:1, Operator:or".
 
 -   `fail_silently`: (Optional) If set to true, workflow will not fail in case
     of any internal error including invalid credentials and plugin dependency
@@ -90,22 +104,22 @@ jobs:
 
 ## Outputs
 
--   `iac_scan_result`: Security Scan Result. One of:
+-   `iac_scan_result`: The result of the security scan. One of:
 
-    1.  `passed` - no violations found or the `failure_criteria` was not
+    1.  `passed` - No violations were found or the `failure_criteria` was not
         satisfied.
-    2.  `failed` - `failure_criteria` was satisfied.
-    3.  `error` - Action ran into execution error, generally due to
-        misconfiguration or invalid credentials.
+    2.  `failed` - The `failure_criteria` was satisfied.
+    3.  `error` - The action ran into an execution error, generally 
+        due to a misconfiguration or invalid credentials.
 
--   `iac_scan_result_sarif_path`: Path for the SARIF Report file. This is only
-    available when violations are found in the scan file.
+-   `iac_scan_result_sarif_path`: The path for the SARIF report file. This 
+    file is only available when violations are found in the scan file.
 
 ## Authorization
 
 Use [google-github-actions/auth](https://github.com/google-github-actions/auth)
 to authenticate the action. You can use [Workload Identity Federation][wif] or
-traditional [Service Account Key JSON][sa] authentication.
+traditional [Service Account Key JSON][sa] for authentication.
 
 ```yaml
 jobs:
