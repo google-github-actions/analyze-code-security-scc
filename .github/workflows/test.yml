@@ -93,12 +93,12 @@ jobs:
           scan_timeout: '1m'
       - name: 'Check scan result and compare sarif report generated.'
         run: |
-          report_expected=$(cat test/resources/sarif.json)
-          report_generated=$(cat ${{steps.violations-found.outputs.iac_scan_result_sarif_path}})
-          if [ $report_expected != $report_generated ]; then
+          report_expected="test/resources/sarif.json"
+          report_generated="${{ steps.violations-found.outputs.iac_scan_result_sarif_path }}"
+          if ! cmp -s "$report_expected" "$report_generated"; then
             exit 1
           fi
-          if [ ${{ steps.violations-found.outputs.iac_scan_result}} != passed ]; then
+          if [ "${{ steps.violations-found.outputs.iac_scan_result }}" != "passed" ]; then
             exit 1
           fi
 
@@ -113,10 +113,10 @@ jobs:
           failure_criteria: 'CRITICAL:2, Operator:OR'
       - name: 'Check scan result and report not generated.'
         run: |
-          if [ ${{steps.no-violations-found.outputs.iac_scan_result_sarif_path}} != '' ]; then
+          if [ "${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}" != "" ]; then
             exit 1
           fi
-          if [ ${{ steps.no-violations-found.outputs.iac_scan_result}} != passed ]; then
+          if [ "${{ steps.no-violations-found.outputs.iac_scan_result }}" != "passed" ]; then
             exit 1
           fi
     
@@ -133,10 +133,10 @@ jobs:
         continue-on-error: true
       - name: 'Check scan result and action build status'
         run: |
-          if [ ${{ steps.failure-criteria-satisfied.outputs.iac_scan_result}} != failed ]; then
+          if [ "${{ steps.failure-criteria-satisfied.outputs.iac_scan_result }}" != "failed" ]; then
             exit 1
           fi
-          if [ ${{ steps.failure-criteria-satisfied.outcome }} != 'failure']; then
+          if [ "${{ steps.failure-criteria-satisfied.outcome }}" != "failure"]; then
            exit 1
           fi
 
@@ -153,7 +153,7 @@ jobs:
           failure_criteria: 'CRITICAL:1, Operator:OR'
       - name: 'Check scan result'
         run: |
-          if [ ${{ steps.failure-criteria-satisfied-ignore-violations-true.outputs.iac_scan_result}} != failed ]; then
+          if [ "${{ steps.failure-criteria-satisfied-ignore-violations-true.outputs.iac_scan_result }}" != "failed" ]; then
             exit 1
           fi
       
@@ -169,10 +169,10 @@ jobs:
         continue-on-error: true
       - name: 'Check scan result and build status'
         run: |
-          if [ ${{ steps.action-internal-error.outputs.iac_scan_result}} != error ]; then
+          if [ "${{ steps.action-internal-error.outputs.iac_scan_result }}" != "error" ]; then
             exit 1
           fi
-          if [ ${{ steps.action-internal-error.outcome}} != 'failure' ]; then
+          if [ "${{ steps.action-internal-error.outcome }}" != "failure" ]; then
             exit 1
           fi
 
@@ -187,6 +187,6 @@ jobs:
           fail_silently: 'true'
       - name: Check scan result 
         run: |
-          if [ ${{ steps.action-internal-error-fail-silently-true.outputs.iac_scan_result}} != error ]; then
+          if [ "${{ steps.action-internal-error-fail-silently-true.outputs.iac_scan_result }}" != "error" ]; then
             exit 1
           fi
