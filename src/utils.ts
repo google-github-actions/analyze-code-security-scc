@@ -14,59 +14,12 @@
  * limitations under the License.
  */
 
-import { errorMessage, parseDuration } from '@google-github-actions/actions-utils/dist';
+import { debug as logDebug } from '@actions/core';
+
+import { errorMessage } from '@google-github-actions/actions-utils';
 import { FailureCriteria, Operator } from './input_configuration';
 import { Severity, Violation } from './accessor';
-import {
-  DEFAULT_FAILURE_CRITERIA,
-  DEFAULT_FAIL_SILENTLY,
-  DEFAULT_IGNORE_VIOLATIONS,
-  DEFAULT_SCAN_TIMEOUT,
-  MAX_SCAN_TIMEOUT,
-  MIN_SCAN_TIMEOUT,
-  SCAN_TIMEOUT_CONFIG_KEY,
-} from './commons/constants';
-
-/**
- * validateAndParseScanTimeOut validates whether given string is valid timeout for scan.
- *
- * If the string is empty or null, this returns the default value for scan_timeout.
- */
-export function validateAndParseScanTimeOut(scan_timeout?: string): number {
-  if (isEmptyString(scan_timeout)) {
-    return DEFAULT_SCAN_TIMEOUT;
-  }
-
-  try {
-    const scanTimeOutNum = parseDuration(scan_timeout ?? '') * 1000;
-    if (scanTimeOutNum > MAX_SCAN_TIMEOUT || scanTimeOutNum < MIN_SCAN_TIMEOUT) {
-      throw new Error(
-        `Expected ${SCAN_TIMEOUT_CONFIG_KEY} to be less than or equal to ${MAX_SCAN_TIMEOUT} and greater than or equal to ${MIN_SCAN_TIMEOUT}, found: ${scanTimeOutNum}`,
-      );
-    }
-    return scanTimeOutNum;
-  } catch (err) {
-    const msg = errorMessage(err);
-    throw new Error(`scan_timeout validation failed: ${msg}`);
-  }
-}
-
-/**
- * validateAndParseIgnoreViolations valdiates whether given string is valid boolean..
- *
- * If the string is empty or null, this returns the default value for ignore_violations.
- */
-export function validateAndParseIgnoreViolations(ignore_violation?: string): boolean {
-  if (isEmptyString(ignore_violation)) {
-    return DEFAULT_IGNORE_VIOLATIONS;
-  }
-  try {
-    return validateAndReturnBoolean(ignore_violation);
-  } catch (err) {
-    const msg = errorMessage(err);
-    throw new Error(`ignore_violations validation failed: ${msg}`);
-  }
-}
+import { DEFAULT_FAILURE_CRITERIA } from './commons/constants';
 
 /**
  * validateAndParseFailureCriteria valdiates whether given string is valid representation for FailureCriteria.
@@ -80,7 +33,7 @@ export function validateAndParseIgnoreViolations(ignore_violation?: string): boo
  * Example of a valid failure_criteria string: "CRITICAL:2, HIGH:1, LOW:1, Operator:and".
  */
 export function validateAndParseFailureCriteria(failure_criteria?: string): FailureCriteria {
-  if (isEmptyString(failure_criteria)) {
+  if (!failure_criteria || failure_criteria == '') {
     failure_criteria = DEFAULT_FAILURE_CRITERIA;
   }
   try {
@@ -93,19 +46,28 @@ export function validateAndParseFailureCriteria(failure_criteria?: string): Fail
 }
 
 /**
- * validateAndParseFailSilently valdiates whether given string is valid boolean.
+ * isFailureCriteriaSatisfied decides if the failure criteria was satisfied.
  *
- * If the string is empty or null, this returns the default value for fail_silently.
+ * It decides this on the basis of configuration customer has set in their workflow and the violations
+ * present in their plan file.
  */
-export function validateAndParseFailSilently(fail_silently?: string): boolean {
-  if (isEmptyString(fail_silently)) {
-    return DEFAULT_FAIL_SILENTLY;
-  }
-  try {
-    return validateAndReturnBoolean(fail_silently);
-  } catch (err) {
-    const msg = errorMessage(err);
-    throw new Error(`fail_silently validation failed: ${msg}`);
+export function isFailureCriteriaSatisfied(
+  failure_criteria: FailureCriteria,
+  violations: Violation[],
+): boolean {
+  const violationsCountBySeverity: Map<Severity, number> = getViolationCountBySeverity(violations);
+  logDebug(`Violations count by Severity: ${[...violationsCountBySeverity.entries()]}`);
+  const violationsThresholdBySeverity = failure_criteria.violationsThresholdBySeverity;
+  const failureCriteriasViolated: boolean[] = getFailureCriteriasViolated(
+    violationsCountBySeverity,
+    violationsThresholdBySeverity,
+  );
+  const operator: Operator = failure_criteria.operator;
+
+  if (operator == Operator.AND) {
+    return failureCriteriasViolated.reduce((acc, currentValue) => acc && currentValue, true);
+  } else {
+    return failureCriteriasViolated.reduce((acc, currentValue) => acc || currentValue, false);
   }
 }
 
@@ -115,7 +77,7 @@ export function validateAndParseFailSilently(fail_silently?: string): boolean {
  * It compares the violations count found in reported violation summary with the violation severity threshold provided by the customer.
  * returns an array of boolean denoting whether a failure criteria was violated or not.
  */
-export function getFailureCriteriasViolated(
+function getFailureCriteriasViolated(
   violationsCountBySeverity: Map<Severity, number>,
   violationsThresholdBySeverity: Map<Severity, number>,
 ): boolean[] {
@@ -133,7 +95,7 @@ export function getFailureCriteriasViolated(
 /**
  * getViolationCountBySeverity generates a map of Severity to the Violation's count.
  */
-export function getViolationCountBySeverity(violations: Violation[]): Map<Severity, number> {
+function getViolationCountBySeverity(violations: Violation[]): Map<Severity, number> {
   const violationsCountBySeverity: Map<Severity, number> = new Map();
   violations.forEach((violation) => {
     const severity: Severity = violation.severity ?? Severity.SeverityUnspecified;
@@ -176,14 +138,10 @@ function validateAndExtractFailureCriteriaFromMap(
     if (violationsThresholdBySeverity.has(severity)) {
       throw new Error(`multiple severities of type ${key} found.`);
     }
-    let valueNum;
-    try {
-      valueNum = validateAndReturnNumber(value);
-    } catch (err) {
-      const msg = errorMessage(err);
-      throw new Error(`invalid severity count, ${msg}`);
+    if (isNaN(+value)) {
+      throw new Error(`invalid severity count`);
     }
-    violationsThresholdBySeverity.set(severity, valueNum);
+    violationsThresholdBySeverity.set(severity, +value);
   });
 
   if (!operator) {
@@ -224,29 +182,4 @@ export function extractSeverityKey(key: string, errMsg: string): Severity {
     throw new Error(errMsg);
   }
   return severityKey;
-}
-
-function validateAndReturnNumber(number?: string): number {
-  if (!number) {
-    throw new Error(`Number is empty`);
-  }
-  if (isNaN(+number)) {
-    throw new Error(`Invalid number: ${number}`);
-  }
-  return +number;
-}
-
-function validateAndReturnBoolean(str?: string): boolean {
-  str = str?.toUpperCase();
-  if (str == 'TRUE') {
-    return true;
-  }
-  if (str == 'FALSE') {
-    return false;
-  }
-  throw new Error(`Expected true or false, found: ${str}`);
-}
-
-function isEmptyString(str?: string): boolean {
-  return str == null || str == '';
 }
