@@ -56,12 +56,15 @@ jobs:
 
   integration:
     permissions:
-      contents: read
+      contents: 'read'
       id-token: 'write'
     runs-on: ubuntu-latest
+
+    env:
+      ORGANIZATION_ID: '777838403257'
     
     steps:
-      - uses: actions/checkout@v4
+      - uses: 'actions/checkout@v4'
 
       - uses: 'actions/setup-node@v4'
         with:
@@ -70,7 +73,7 @@ jobs:
       - name: 'npm build'
         run: 'npm ci && npm run build'
 
-      - uses: google-github-actions/auth@v2
+      - uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: 'projects/111685897256/locations/global/workloadIdentityPools/github/providers/my-repo' 
           service_account: 'jenkins-plugin-v-16-nov@tf-deployer-2.iam.gserviceaccount.com'
@@ -79,7 +82,7 @@ jobs:
         name: 'Violations found in plan file'
         uses: ./
         with:
-          organization_id: '777838403257'
+          organization_id: $ORGANIZATION_ID
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
@@ -88,7 +91,7 @@ jobs:
           ignore_violations: 'false'
           fail_silently: 'false'
           scan_timeout: '1m'
-      - name: Check scan result and compare sarif report generated.
+      - name: 'Check scan result and compare sarif report generated.'
         run: |
           report_expected=$(cat test/resources/sarif.json)
           report_generated=$(cat ${{steps.violations-found.outputs.iac_scan_result_sarif_path}})
@@ -103,12 +106,12 @@ jobs:
         name: 'No violations found in plan file'
         uses: ./
         with:
-          organization_id: '777838403257'
+          organization_id: $ORGANIZATION_ID
           scan_file_ref: 'test/resources/no-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           failure_criteria: 'CRITICAL:2, Operator:OR'
-      - name: Check scan result and report not generated.
+      - name: 'Check scan result and report not generated.'
         run: |
           if [ ${{steps.no-violations-found.outputs.iac_scan_result_sarif_path}} != '' ]; then
             exit 1
@@ -121,14 +124,14 @@ jobs:
         name: 'Failure criteria satisfied'
         uses: ./
         with:
-          organization_id: '777838403257'
+          organization_id: $ORGANIZATION_ID
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           failure_criteria: 'CRITICAL:1, Operator:OR'
         continue-on-error: true
-      - name: Check scan result and action build status
+      - name: 'Check scan result and action build status'
         run: |
           if [ ${{ steps.failure-criteria-satisfied.outputs.iac_scan_result}} != failed ]; then
             exit 1
@@ -141,14 +144,14 @@ jobs:
         name: 'Failure criteria satisfied, ignore violations true'
         uses: ./
         with:
-          organization_id: '777838403257'
+          organization_id: $ORGANIZATION_ID
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           ignore_violations: 'true'
           failure_criteria: 'CRITICAL:1, Operator:OR'
-      - name: Check scan result
+      - name: 'Check scan result'
         run: |
           if [ ${{ steps.failure-criteria-satisfied-ignore-violations-true.outputs.iac_scan_result}} != failed ]; then
             exit 1
@@ -164,7 +167,7 @@ jobs:
           iac_type: 'terraform'
           iac_version: '1.0.0'
         continue-on-error: true
-      - name: Check scan result and build status
+      - name: 'Check scan result and build status'
         run: |
           if [ ${{ steps.action-internal-error.outputs.iac_scan_result}} != error ]; then
             exit 1
@@ -179,11 +182,11 @@ jobs:
         with:
           organization_id: 'invalid-id'
           scan_file_ref: 'test/resources/with-violations-tf_plan.json'
-          iac_type: terraform
+          iac_type: 'terraform'
           iac_version: '1.0.0'
-          fail_silently: true
+          fail_silently: 'true'
       - name: Check scan result 
         run: |
-          if [ ${{ steps.action-internal-error.outputs.iac_scan_result}} != error ]; then
+          if [ ${{ steps.action-internal-error-fail-silently-true.outputs.iac_scan_result}} != error ]; then
             exit 1
           fi

@@ -59,7 +59,7 @@ inputs:
       to arrive at `failure_criteria` value.
       If the `failure_criteria` evaluates to `true`, the workflow is marked as `FAILED`. 
       Otherwise, the workflow is marked as `SUCCESS`.
-    default: 'Critical:1, High:1, Medium:1, Low:1, Operator:or'
+    default: 'Critical:1, High:1, Medium:1, Low:1, Operator:OR'
     required: false
   fail_silently:
     description: |-

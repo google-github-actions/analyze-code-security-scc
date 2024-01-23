@@ -12,7 +12,8 @@ This action lets you:
 - Display issues with their severity as a SARIF Report in the GitHub Workspace after a scan completes.
 - Define severity-based failure criteria for passing or failing the build.
 
-Note : This is a Security Command Center Premium tier offering for subscription customers only. You must activate the Security Command Center Premium tier in the Google Cloud organization to use this feature.
+> [!NOTE] 
+> This is a Security Command Center Premium tier offering for subscription customers only. You must activate the Security Command Center Premium tier in the Google Cloud organization to use this feature.
 
 ## Prerequisites
 
