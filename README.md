@@ -42,6 +42,7 @@ jobs:
       id-token: 'write'
 
     steps:
+    - uses: 'actions/checkout@v4'
     - id: 'auth'
       uses: 'google-github-actions/auth@v2'
       with:
@@ -57,7 +58,7 @@ jobs:
         iac_version: '1.0.0'
         scan_timeout: '1m'
         ignore_violations: false
-        failure_criteria: 'High:1,Medium:1,Low:1,Operator:or'
+        failure_criteria: 'High:1,Medium:1,Low:1,Operator:OR'
         fail_silently: true
 
     - if: ${{ steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != '' }}
@@ -100,7 +101,7 @@ jobs:
 
     If the `failure_criteria` evaluates to `true`, the workflow is marked as 
     `FAILED`. Otherwise, the workflow is marked as `SUCCESS`. The default is 
-    "Critical:1, High:1, Medium:1, Low:1, Operator:or".
+    "Critical:1, High:1, Medium:1, Low:1, Operator:OR".
 
 -   `fail_silently`: (Optional) If set to true, workflow will not fail in case
     of any internal error including invalid credentials and plugin dependency
