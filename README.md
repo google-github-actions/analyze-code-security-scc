@@ -57,9 +57,9 @@ jobs:
         iac_type: 'terraform'
         iac_version: '1.0.0'
         scan_timeout: '1m'
-        ignore_violations: 'false'
-        failure_criteria: 'High:1,Medium:1,Low:1,Operator:or'
-        fail_silently: 'true'
+        ignore_violations: false
+        failure_criteria: 'High:1,Medium:1,Low:1,Operator:OR'
+        fail_silently: true
 
     - if: ${{ steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != '' }}
         uses: 'actions/upload-artifact@v4'
