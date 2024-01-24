@@ -217,7 +217,7 @@ export class IACAccessor {
         throw new IACValidationException(
           /* statusCode= */ 500,
           `[Internal Error] Validation Service Endpoint Returned
-        invalid violations with one or more missing key Attributes, policyID : ${violation.policyId}, assetId : ${violation.assetId}`,
+        invalid violations with one or more missing key Attributes, policyID : ${violation.policyId ?? ''}, assetId : ${violation.assetId ?? ''}`,
         );
       }
     });

@@ -148,7 +148,7 @@ function validateAndExtractFailureCriteriaFromMap(
     throw new Error('no operator found');
   }
   if (violationsThresholdBySeverity.size == 0) {
-    throw new Error('no severity mentioned in operator');
+    throw new Error('no severity mentioned');
   }
   return {
     violationsThresholdBySeverity: violationsThresholdBySeverity,
