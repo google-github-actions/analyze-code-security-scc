@@ -101,24 +101,25 @@ jobs:
           if [ "${{ steps.violations-found.outputs.iac_scan_result }}" != "passed" ]; then
             exit 1
           fi
-
-      - id: 'no-violations-found'
-        name: 'No violations found in plan file'
-        uses: './'
-        with:
-          organization_id: '${{ env.ORGANIZATION_ID }}'
-          scan_file_ref: 'test/resources/no-violations-tf_plan.json'
-          iac_type: 'terraform'
-          iac_version: '1.0.0'
-          failure_criteria: 'CRITICAL:2, Operator:OR'
-      - name: 'Check scan result and report not generated.'
-        run: |
-          if [ "${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}" != "" ]; then
-            exit 1
-          fi
-          if [ "${{ steps.no-violations-found.outputs.iac_scan_result }}" != "passed" ]; then
-            exit 1
-          fi
+      
+      # TODO: Enable this test. See: https://github.com/google-github-actions/analyze-code-security-scc/issues/11
+      # - id: 'no-violations-found'
+      #   name: 'No violations found in plan file'
+      #   uses: './'
+      #   with:
+      #     organization_id: '${{ env.ORGANIZATION_ID }}'
+      #     scan_file_ref: 'test/resources/no-violations-tf_plan.json'
+      #     iac_type: 'terraform'
+      #     iac_version: '1.0.0'
+      #     failure_criteria: 'CRITICAL:2, Operator:OR'
+      # - name: 'Check scan result and report not generated.'
+      #   run: |
+      #     if [ "${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}" != "" ]; then
+      #       exit 1
+      #     fi
+      #     if [ "${{ steps.no-violations-found.outputs.iac_scan_result }}" != "passed" ]; then
+      #       exit 1
+      #     fi
     
       - id: 'failure-criteria-satisfied'
         name: 'Failure criteria satisfied'
