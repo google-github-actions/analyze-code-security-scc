@@ -18,5 +18,3 @@ export const VALIDATE_ENDPOINT_DOMAIN = 'https://securityposture.googleapis.com/
 export const VALIDATE_ENDPOINT_PATH = (orgId: string) =>
   `/organizations/${orgId}/locations/global/reports:createIaCValidationReport`;
 export const RETRIABLE_ERROR_CODES = [408, 429, 500, 502, 503, 504];
-export const MAX_RETRIES_FOR_INITIATE_SCAN = 3;
-export const MAX_RETRIES_FOR_POLLING = 50;

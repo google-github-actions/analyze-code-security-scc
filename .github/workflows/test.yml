@@ -37,6 +37,9 @@ jobs:
   unit:
     name: 'unit'
     runs-on: 'ubuntu-latest'
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
     steps:
       - uses: 'actions/checkout@v4'
@@ -50,6 +53,11 @@ jobs:
 
       - name: 'npm lint'
         run: 'npm run lint'
+      
+      - uses: google-github-actions/auth@v2
+        with:
+          workload_identity_provider: 'projects/111685897256/locations/global/workloadIdentityPools/github/providers/my-repo'
+          service_account: 'jenkins-plugin-v-16-nov@tf-deployer-2.iam.gserviceaccount.com'
 
       - name: 'npm test'
         run: 'npm run test'

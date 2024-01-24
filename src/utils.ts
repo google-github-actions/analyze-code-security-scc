@@ -126,17 +126,17 @@ function validateAndExtractFailureCriteriaFromMap(
   keyValueMap.forEach((value, key) => {
     if (isValidOperatorKey(key)) {
       if (operator) {
-        throw new Error(`multiple operators found.`);
+        throw new Error(`multiple operators found`);
       }
       operator = extractOperatorValue(value);
       return;
     }
     const severity: Severity = extractSeverityKey(
       key,
-      /** errMsg= */ `invalid key: ${key}, value: ${value} pair found.`,
+      /** errMsg= */ `invalid key: ${key}, value: ${value} pair found`,
     );
     if (violationsThresholdBySeverity.has(severity)) {
-      throw new Error(`multiple severities of type ${key} found.`);
+      throw new Error(`multiple severities of type ${key} found`);
     }
     if (isNaN(+value)) {
       throw new Error(`invalid severity count`);
@@ -145,10 +145,10 @@ function validateAndExtractFailureCriteriaFromMap(
   });
 
   if (!operator) {
-    throw new Error('no operator found.');
+    throw new Error('no operator found');
   }
   if (violationsThresholdBySeverity.size == 0) {
-    throw new Error('no severity mentioned in operator.');
+    throw new Error('no severity mentioned in operator');
   }
   return {
     violationsThresholdBySeverity: violationsThresholdBySeverity,

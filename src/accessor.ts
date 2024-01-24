@@ -19,12 +19,7 @@ import { GoogleAuth } from 'google-auth-library';
 import { debug as logDebug } from '@actions/core';
 import { errorMessage, toBase64, fromBase64 } from '@google-github-actions/actions-utils';
 
-import {
-  MAX_RETRIES_FOR_INITIATE_SCAN,
-  MAX_RETRIES_FOR_POLLING,
-  RETRIABLE_ERROR_CODES,
-  VALIDATE_ENDPOINT_PATH,
-} from './commons/http_config';
+import { RETRIABLE_ERROR_CODES, VALIDATE_ENDPOINT_PATH } from './commons/http_config';
 import { IACValidationException } from './exception';
 import { SCAN_FILE_MAX_SIZE_BYTES, USER_AGENT } from './commons/constants';
 
@@ -137,6 +132,8 @@ export class IACAccessor {
    * @param scanTimeOut max time period for which scanning should be attempted.
    * @param scanStartTime timestamp in millis at which scanning was stared.
    * @param version action version, use to contruct user agent.
+   * @param httpClient http client to interact with IAC Scanning API.
+   * @param date used for retrieval of current time.
    */
   constructor(
     private readonly baseURL: string,
@@ -144,8 +141,10 @@ export class IACAccessor {
     private readonly scanTimeOut: number,
     private readonly scanStartTime: number,
     private readonly version: string,
+    private readonly httpClient?: HttpClient,
+    private readonly date?: Date,
   ) {
-    this.client = new HttpClient(USER_AGENT(version));
+    this.client = httpClient ?? new HttpClient(USER_AGENT(version));
     this.auth = new GoogleAuth({
       scopes: ['https://www.googleapis.com/auth/cloud-platform'],
     });
@@ -155,7 +154,6 @@ export class IACAccessor {
   private async request(
     method: string,
     url: string,
-    maxRetries: number,
     errorMsg: string,
     data?: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   ) {
@@ -167,7 +165,7 @@ export class IACAccessor {
       'Content-Type': 'application/json',
     };
 
-    while (this.shouldRetry(this.retryCount, maxRetries)) {
+    while (this.shouldRetry()) {
       try {
         const intervalMs: number = Math.pow(2, this.retryCount) * 1000;
         this.retryCount++;
@@ -176,7 +174,7 @@ export class IACAccessor {
         const body = await response.readBody();
         const statusCode = response.message.statusCode || 500;
 
-        if (RETRIABLE_ERROR_CODES.includes(statusCode) && this.retryCount != maxRetries) {
+        if (RETRIABLE_ERROR_CODES.includes(statusCode)) {
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
           continue;
         }
@@ -200,11 +198,8 @@ export class IACAccessor {
     throw new IACValidationException(/* statusCode= */ 500, `Operation timed out`);
   }
 
-  private shouldRetry(retryCount: number, maxRetryCount: number): boolean {
-    if (retryCount >= maxRetryCount) {
-      return false;
-    }
-    const currentTime = new Date().getTime();
+  private shouldRetry(): boolean {
+    const currentTime = this.date ? this.date.getTime() : new Date().getTime();
     return currentTime < this.scanStartTime + this.scanTimeOut;
   }
 
@@ -276,9 +271,8 @@ export class IACAccessor {
    * @param name Name of the operation, of the format `operations/{name}`.
    */
   private async pollOperation(name: string): Promise<Operation> {
-    while (this.retryCount < MAX_RETRIES_FOR_POLLING) {
+    while (this.shouldRetry()) {
       const intervalMs: number = Math.pow(2, this.retryCount) * 1000;
-      this.retryCount++;
       const resp = await this.getOperation(name);
       if (resp && resp.done) {
         return resp;
@@ -299,7 +293,6 @@ export class IACAccessor {
     const resp: Operation = await this.request(
       'GET',
       u,
-      MAX_RETRIES_FOR_POLLING,
       /*errorMsg=*/ 'encountered error while performing scan operation',
     );
     return resp;
@@ -326,7 +319,6 @@ export class IACAccessor {
       const resp: Operation = await this.request(
         'POST',
         u,
-        MAX_RETRIES_FOR_INITIATE_SCAN,
         /*errorMsg=*/ 'encountered error while requesting scan',
         body,
       );
