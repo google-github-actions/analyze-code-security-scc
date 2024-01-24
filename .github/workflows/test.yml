@@ -54,7 +54,7 @@ jobs:
       - name: 'npm lint'
         run: 'npm run lint'
       
-      - uses: google-github-actions/auth@v2
+      - uses: 'google-github-actions/auth@v2'
         with:
           workload_identity_provider: 'projects/111685897256/locations/global/workloadIdentityPools/github/providers/my-repo'
           service_account: 'jenkins-plugin-v-16-nov@tf-deployer-2.iam.gserviceaccount.com'
@@ -92,7 +92,7 @@ jobs:
         with:
           organization_id: '${{ env.ORGANIZATION_ID }}'
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
-          scan_file_ref: 'test/resources/with-violations-tf_plan.json'
+          scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           failure_criteria: 'CRITICAL:2, Operator:OR'
@@ -101,7 +101,7 @@ jobs:
           scan_timeout: '1m'
       - name: 'Check scan result and compare sarif report generated.'
         run: |
-          report_expected="test/resources/sarif.json"
+          report_expected="tests/resources/sarif.json"
           report_generated="${{ steps.violations-found.outputs.iac_scan_result_sarif_path }}"
           if cmp -s "$report_expected" "$report_generated"; then
             exit 1
@@ -116,7 +116,7 @@ jobs:
       #   uses: './'
       #   with:
       #     organization_id: '${{ env.ORGANIZATION_ID }}'
-      #     scan_file_ref: 'test/resources/no-violations-tf_plan.json'
+      #     scan_file_ref: 'tests/resources/no-violations-tf_plan.json'
       #     iac_type: 'terraform'
       #     iac_version: '1.0.0'
       #     failure_criteria: 'CRITICAL:2, Operator:OR'
@@ -135,7 +135,7 @@ jobs:
         with:
           organization_id: '${{ env.ORGANIZATION_ID }}'
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
-          scan_file_ref: 'test/resources/with-violations-tf_plan.json'
+          scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           failure_criteria: 'CRITICAL:1, Operator:OR'
@@ -155,7 +155,7 @@ jobs:
         with:
           organization_id: '${{ env.ORGANIZATION_ID }}'
           # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
-          scan_file_ref: 'test/resources/with-violations-tf_plan.json'
+          scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           ignore_violations: 'true'
@@ -172,7 +172,7 @@ jobs:
         with:
           # Invalid org id, will cause an internal error in action
           organization_id: 'invalid-id'
-          scan_file_ref: 'test/resources/with-violations-tf_plan.json'
+          scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
         continue-on-error: true
@@ -190,7 +190,7 @@ jobs:
         uses: './'
         with:
           organization_id: 'invalid-id'
-          scan_file_ref: 'test/resources/with-violations-tf_plan.json'
+          scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           fail_silently: 'true'

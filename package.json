@@ -7,7 +7,7 @@
     "build": "ncc build -m src/main.ts -o dist/main",
     "lint": "eslint . --ext .ts,.tsx",
     "format": "prettier --write **/*.ts",
-    "test": "node --require ts-node/register --test-reporter spec --test test/accessor.test.ts test/iac_scan_report_processor.test.ts test/utils.test.ts"
+    "test": "node --require ts-node/register --test-reporter spec --test tests/accessor.test.ts tests/iac_scan_report_processor.test.ts tests/utils.test.ts"
   },
   "repository": {
     "type": "git",

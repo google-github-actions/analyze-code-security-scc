@@ -148,7 +148,7 @@ test(
       },
     ];
 
-    cases.forEach((tc) => {
+    for await (const tc of cases) {
       suite.test(tc.name, () => {
         if (tc.error) {
           try {
@@ -178,7 +178,7 @@ test(
           assert.deepStrictEqual(failureCriteria.operator, tc.expected?.operator);
         }
       });
-    });
+    }
   },
 );
 
@@ -329,13 +329,13 @@ test(
         expected: true,
       },
     ];
-    cases.forEach((tc) => {
+    for await (const tc of cases) {
       suite.test(tc.name, () => {
         assert.deepStrictEqual(
           isFailureCriteriaSatisfied(tc.input.failureCriteria, tc.input.violations),
           tc.expected,
         );
       });
-    });
+    }
   },
 );
