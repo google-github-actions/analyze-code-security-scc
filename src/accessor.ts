@@ -19,12 +19,7 @@ import { GoogleAuth } from 'google-auth-library';
 import { debug as logDebug } from '@actions/core';
 import { errorMessage, toBase64, fromBase64 } from '@google-github-actions/actions-utils';
 
-import {
-  MAX_RETRIES_FOR_INITIATE_SCAN,
-  MAX_RETRIES_FOR_POLLING,
-  RETRIABLE_ERROR_CODES,
-  VALIDATE_ENDPOINT_PATH,
-} from './commons/http_config';
+import { RETRIABLE_ERROR_CODES, VALIDATE_ENDPOINT_PATH } from './commons/http_config';
 import { IACValidationException } from './exception';
 import { SCAN_FILE_MAX_SIZE_BYTES, USER_AGENT } from './commons/constants';
 
@@ -155,7 +150,6 @@ export class IACAccessor {
   private async request(
     method: string,
     url: string,
-    maxRetries: number,
     errorMsg: string,
     data?: any, // eslint-disable-line @typescript-eslint/no-explicit-any
   ) {
@@ -167,7 +161,7 @@ export class IACAccessor {
       'Content-Type': 'application/json',
     };
 
-    while (this.shouldRetry(this.retryCount, maxRetries)) {
+    while (this.shouldRetry()) {
       try {
         const intervalMs: number = Math.pow(2, this.retryCount) * 1000;
         this.retryCount++;
@@ -176,7 +170,7 @@ export class IACAccessor {
         const body = await response.readBody();
         const statusCode = response.message.statusCode || 500;
 
-        if (RETRIABLE_ERROR_CODES.includes(statusCode) && this.retryCount != maxRetries) {
+        if (RETRIABLE_ERROR_CODES.includes(statusCode)) {
           await new Promise((resolve) => setTimeout(resolve, intervalMs));
           continue;
         }
@@ -200,10 +194,7 @@ export class IACAccessor {
     throw new IACValidationException(/* statusCode= */ 500, `Operation timed out`);
   }
 
-  private shouldRetry(retryCount: number, maxRetryCount: number): boolean {
-    if (retryCount >= maxRetryCount) {
-      return false;
-    }
+  private shouldRetry(): boolean {
     const currentTime = new Date().getTime();
     return currentTime < this.scanStartTime + this.scanTimeOut;
   }
@@ -222,7 +213,7 @@ export class IACAccessor {
         throw new IACValidationException(
           /* statusCode= */ 500,
           `[Internal Error] Validation Service Endpoint Returned
-        invalid violations with one or more missing key Attributes, policyID : ${violation.policyId}, assetId : ${violation.assetId}`,
+        invalid violations with one or more missing key Attributes, policyID : ${violation.policyId ?? ''}, assetId : ${violation.assetId ?? ''}`,
         );
       }
     });
@@ -276,9 +267,8 @@ export class IACAccessor {
    * @param name Name of the operation, of the format `operations/{name}`.
    */
   private async pollOperation(name: string): Promise<Operation> {
-    while (this.retryCount < MAX_RETRIES_FOR_POLLING) {
+    while (this.shouldRetry()) {
       const intervalMs: number = Math.pow(2, this.retryCount) * 1000;
-      this.retryCount++;
       const resp = await this.getOperation(name);
       if (resp && resp.done) {
         return resp;
@@ -299,7 +289,6 @@ export class IACAccessor {
     const resp: Operation = await this.request(
       'GET',
       u,
-      MAX_RETRIES_FOR_POLLING,
       /*errorMsg=*/ 'encountered error while performing scan operation',
     );
     return resp;
@@ -326,7 +315,6 @@ export class IACAccessor {
       const resp: Operation = await this.request(
         'POST',
         u,
-        MAX_RETRIES_FOR_INITIATE_SCAN,
         /*errorMsg=*/ 'encountered error while requesting scan',
         body,
       );

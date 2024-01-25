@@ -61,7 +61,7 @@ const version = require('../package.json').version;
 async function run(): Promise<void> {
   logInfo(`IaC Scanning Action invoked`);
   try {
-    const organizationId = getInput(ORGANIZATION_ID_CONFIG_KEY, { required: true });
+    const organizationID = getInput(ORGANIZATION_ID_CONFIG_KEY, { required: true });
     const scanFileRef = getInput(SCAN_FILE_REF_CONFIG_KEY, { required: true });
     const iacType = getInput(IAC_TYPE_CONFIG_KEY, { required: true });
     const iacVersion = getInput(IAC_VERSION_CONFIG_KEY, { required: true });
@@ -92,7 +92,7 @@ async function run(): Promise<void> {
     const scanStartTime = new Date().getTime();
     const accessor = new IACAccessor(
       VALIDATE_ENDPOINT_DOMAIN,
-      organizationId,
+      organizationID,
       scanTimeoutMs,
       scanStartTime,
       version,
