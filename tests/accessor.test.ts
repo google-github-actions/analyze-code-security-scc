@@ -14,9 +14,8 @@
  * limitations under the License.
  */
 
-import { test } from 'node:test';
+import { test, mock, Mock } from 'node:test';
 import assert from 'node:assert';
-import { stub, SinonStub } from 'sinon';
 
 import { IACAccessor } from '../src/accessor';
 import { HttpClient } from '@actions/http-client';
@@ -53,55 +52,35 @@ test(
     concurrency: true,
   },
   async (suite) => {
-    let httpClientStub: SinonStub;
-    let dateStub: SinonStub;
     let accessor: IACAccessor;
-
     suite.beforeEach(function () {
-      const httpClient = new HttpClient();
-      const date = new Date();
-      httpClientStub = stub(httpClient, 'request');
-      dateStub = stub(date, 'getTime');
-      dateStub.returns(0);
-      accessor = new IACAccessor(
-        BASE_URL,
-        ORGANIZATION_ID,
-        /* scanTimeOut= */ 60000,
-        /* scanStartTime= */ 0,
-        /* version= */ 'version',
-        httpClient,
-        date,
-      );
+      accessor = new IACAccessor(BASE_URL, ORGANIZATION_ID, 60000, 0, 'version');
+      mock.method(Date.prototype, 'getTime', function () {
+        return 0;
+      });
     });
 
-    suite.afterEach(function () {
-      httpClientStub.restore();
-      dateStub.restore();
-    });
-
-    await suite.test('calls IaC Scanning API', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(/* callNo= */ 1, /* statusCode= */ 200, /* body= */ POLL_OPERAITON_RESPONSE);
+    await suite.test('calls IaC Scanning API', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, POLL_OPERAITON_RESPONSE);
 
       const violations = await accessor.scan(IAC);
 
-      assert.ok(
-        httpClientStub.calledWith(
-          'POST',
-          BASE_URL + VALIDATE_ENDPOINT_PATH(ORGANIZATION_ID),
-          JSON.stringify({
-            parent: ORGANIZATION_ID,
-            iac: {
-              tf_plan: toBase64(IAC),
-            },
-          }),
-        ),
-      );
-      assert.ok(httpClientStub.calledWith('GET', BASE_URL + '/' + 'operation-id'));
+      assert.deepStrictEqual(m.mock.calls.at(0)?.arguments.slice(0, 3), [
+        'POST',
+        BASE_URL + VALIDATE_ENDPOINT_PATH(ORGANIZATION_ID),
+        JSON.stringify({
+          parent: ORGANIZATION_ID,
+          iac: {
+            tf_plan: toBase64(IAC),
+          },
+        }),
+      ]);
+      assert.deepStrictEqual(m.mock.calls.at(1)?.arguments.slice(0, 2), [
+        'GET',
+        BASE_URL + '/' + 'operation-id',
+      ]);
       assert.deepStrictEqual(violations, [
         {
           assetId: 'asset-id',
@@ -111,22 +90,20 @@ test(
       ]);
     });
 
-    await suite.test('retry scan request for retryable errors', async function () {
-      mockHttpResponse(/* callNo= */ 0, /* statusCode= */ 429, /* body= */ {});
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(/* callNo= */ 2, /* statusCode= */ 200, /* body= */ POLL_OPERAITON_RESPONSE);
+    await suite.test('retry scan request for retryable errors', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 429, {});
+      mockHttpResponse(m, 1, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 2, 200, POLL_OPERAITON_RESPONSE);
 
       await accessor.scan(IAC);
 
-      assert.ok(httpClientStub.calledThrice);
+      assert.deepStrictEqual(m.mock.callCount(), 3);
     });
 
-    await suite.test('throws for non-retryable errors', async function () {
-      mockHttpResponse(/* callNo= */ 0, /* statusCode= */ 400, /* body= */ {});
+    await suite.test('throws for non-retryable errors', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 400, {});
 
       await assert.rejects(
         async () => {
@@ -169,34 +146,24 @@ test(
       );
     });
 
-    await suite.test('retry on operation response not done', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ {
-          name: 'operation-id',
-          done: false,
-        },
-      );
-      mockHttpResponse(/* callNo= */ 2, /* statusCode= */ 200, /* body= */ POLL_OPERAITON_RESPONSE);
+    await suite.test('retry on operation response not done', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, {
+        name: 'operation-id',
+        done: false,
+      });
+      mockHttpResponse(m, 2, 200, POLL_OPERAITON_RESPONSE);
 
       await accessor.scan(IAC);
 
-      assert.ok(httpClientStub.calledThrice);
+      assert.deepStrictEqual(m.mock.callCount(), 3);
     });
 
-    await suite.test('throws on error while polling operation', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(/* callNo= */ 1, /* statusCode= */ 400, /* body= */ {});
+    await suite.test('throws on error while polling operation', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 400, {});
 
       await assert.rejects(
         async () => {
@@ -216,24 +183,17 @@ test(
       );
     });
 
-    await suite.test('throws on error found in polling response', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ {
-          name: 'operation-id',
-          done: true,
-          error: {
-            code: 400,
-            message: 'error',
-          },
+    await suite.test('throws on error found in polling response', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, {
+        name: 'operation-id',
+        done: true,
+        error: {
+          code: 400,
+          message: 'error',
         },
-      );
+      });
 
       await assert.rejects(
         async () => {
@@ -251,20 +211,13 @@ test(
       );
     });
 
-    await suite.test('throws on no response found in operation', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ {
-          name: 'operation-id',
-          done: true,
-        },
-      );
+    await suite.test('throws on no response found in operation', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, {
+        name: 'operation-id',
+        done: true,
+      });
 
       await assert.rejects(
         async () => {
@@ -282,21 +235,14 @@ test(
       );
     });
 
-    await suite.test('throws on no report in operation response', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ {
-          name: 'operation-id',
-          done: true,
-          response: {},
-        },
-      );
+    await suite.test('throws on no report in operation response', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, {
+        name: 'operation-id',
+        done: true,
+        response: {},
+      });
 
       await assert.rejects(
         async () => {
@@ -314,29 +260,22 @@ test(
       );
     });
 
-    await suite.test('throws on asset id not found in violation', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ {
-          name: 'operation-id',
-          done: true,
-          response: {
-            iacValidationReport: {
-              violations: [
-                {
-                  policyId: 'policy-id',
-                },
-              ],
-            },
+    await suite.test('throws on asset id not found in violation', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, {
+        name: 'operation-id',
+        done: true,
+        response: {
+          iacValidationReport: {
+            violations: [
+              {
+                policyId: 'policy-id',
+              },
+            ],
           },
         },
-      );
+      });
 
       await assert.rejects(
         async () => {
@@ -355,29 +294,22 @@ test(
       );
     });
 
-    await suite.test('throws on policy id not found in violation', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ {
-          name: 'operation-id',
-          done: true,
-          response: {
-            iacValidationReport: {
-              violations: [
-                {
-                  assetId: 'asset-id',
-                },
-              ],
-            },
+    await suite.test('throws on policy id not found in violation', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, {
+        name: 'operation-id',
+        done: true,
+        response: {
+          iacValidationReport: {
+            violations: [
+              {
+                assetId: 'asset-id',
+              },
+            ],
           },
         },
-      );
+      });
 
       await assert.rejects(
         async () => {
@@ -396,30 +328,23 @@ test(
       );
     });
 
-    await suite.test('no-severity-mentioned-converted-to-unspecified', async function () {
-      mockHttpResponse(
-        /* callNo= */ 0,
-        /* statusCode= */ 200,
-        /* body= */ CREATE_SCAN_OPERATION_RESPONSE,
-      );
-      mockHttpResponse(
-        /* callNo= */ 1,
-        /* statusCode= */ 200,
-        /* body= */ {
-          name: 'operation-id',
-          done: true,
-          response: {
-            iacValidationReport: {
-              violations: [
-                {
-                  policyId: 'policy-id',
-                  assetId: 'asset-id',
-                },
-              ],
-            },
+    await suite.test('no-severity-mentioned-converted-to-unspecified', async function (t) {
+      const m = t.mock.method(HttpClient.prototype, 'request');
+      mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
+      mockHttpResponse(m, 1, 200, {
+        name: 'operation-id',
+        done: true,
+        response: {
+          iacValidationReport: {
+            violations: [
+              {
+                policyId: 'policy-id',
+                assetId: 'asset-id',
+              },
+            ],
           },
         },
-      );
+      });
 
       const violations = await accessor.scan(IAC);
 
@@ -432,17 +357,26 @@ test(
       ]);
     });
 
-    function mockHttpResponse(callNo: number, statusCode: number, body: any) {
-      httpClientStub.onCall(callNo).resolves({
-        message: {
-          statusCode: statusCode,
-        },
-        readBody() {
-          return new Promise<string>((resolve) => {
-            resolve(JSON.stringify(body));
-          });
-        },
-      });
+    function mockHttpResponse(
+      fn: Mock<typeof HttpClient.prototype.request>,
+      callNo: number,
+      statusCode: number,
+      body: any,
+    ) {
+      fn.mock.mockImplementationOnce(
+        () =>
+          Promise.resolve({
+            message: {
+              statusCode: statusCode,
+            },
+            readBody() {
+              return new Promise<string>((resolve) => {
+                resolve(JSON.stringify(body));
+              });
+            },
+          }),
+        callNo,
+      );
     }
   },
 );

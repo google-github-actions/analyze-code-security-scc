@@ -132,8 +132,6 @@ export class IACAccessor {
    * @param scanTimeOut max time period for which scanning should be attempted.
    * @param scanStartTime timestamp in millis at which scanning was stared.
    * @param version action version, use to contruct user agent.
-   * @param httpClient http client to interact with IAC Scanning API.
-   * @param date used for retrieval of current time.
    */
   constructor(
     private readonly baseURL: string,
@@ -141,10 +139,8 @@ export class IACAccessor {
     private readonly scanTimeOut: number,
     private readonly scanStartTime: number,
     private readonly version: string,
-    private readonly httpClient?: HttpClient,
-    private readonly date?: Date,
   ) {
-    this.client = httpClient ?? new HttpClient(USER_AGENT(version));
+    this.client = new HttpClient(USER_AGENT(version));
     this.auth = new GoogleAuth({
       scopes: ['https://www.googleapis.com/auth/cloud-platform'],
     });
@@ -199,7 +195,7 @@ export class IACAccessor {
   }
 
   private shouldRetry(): boolean {
-    const currentTime = this.date ? this.date.getTime() : new Date().getTime();
+    const currentTime = new Date().getTime();
     return currentTime < this.scanStartTime + this.scanTimeOut;
   }
 
