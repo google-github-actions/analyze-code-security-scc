@@ -15,7 +15,7 @@
 name: 'Analyze Code Security'
 author: 'Google LLC'
 description: |-
-  Scan IaC files for security risks.
+  Scan and analyze code for security risks using Google Cloud.
 
 inputs:
   organization_id:
