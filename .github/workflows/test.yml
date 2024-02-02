@@ -56,8 +56,8 @@ jobs:
       
       - uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: 'projects/111685897256/locations/global/workloadIdentityPools/github/providers/my-repo'
-          service_account: 'jenkins-plugin-v-16-nov@tf-deployer-2.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/251902844862/locations/global/workloadIdentityPools/github/providers/my-repo'
+          service_account: 'iac-scan-plugins@iac-scan-integration-test.iam.gserviceaccount.com'
 
       - name: 'npm test'
         run: 'npm run test'
@@ -69,7 +69,7 @@ jobs:
     runs-on: 'ubuntu-latest'
 
     env:
-      ORGANIZATION_ID: '777838403257'
+      ORGANIZATION_ID: '627849321070'
     
     steps:
       - uses: 'actions/checkout@v4'
@@ -83,15 +83,15 @@ jobs:
 
       - uses: 'google-github-actions/auth@v2'
         with:
-          workload_identity_provider: 'projects/111685897256/locations/global/workloadIdentityPools/github/providers/my-repo' 
-          service_account: 'jenkins-plugin-v-16-nov@tf-deployer-2.iam.gserviceaccount.com'
+          workload_identity_provider: 'projects/251902844862/locations/global/workloadIdentityPools/github/providers/my-repo' 
+          service_account: 'iac-scan-plugins@iac-scan-integration-test.iam.gserviceaccount.com'
 
       - id: 'violations-found'
         name: 'Violations found in plan file'
         uses: './'
         with:
           organization_id: '${{ env.ORGANIZATION_ID }}'
-          # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
+          # plan file has 1 UNSPECIFIED, 1 HIGH severity vulnerabilites
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
@@ -110,35 +110,34 @@ jobs:
             exit 1
           fi
       
-      # TODO: Enable this test. See: https://github.com/google-github-actions/analyze-code-security-scc/issues/11
-      # - id: 'no-violations-found'
-      #   name: 'No violations found in plan file'
-      #   uses: './'
-      #   with:
-      #     organization_id: '${{ env.ORGANIZATION_ID }}'
-      #     scan_file_ref: 'tests/resources/no-violations-tf_plan.json'
-      #     iac_type: 'terraform'
-      #     iac_version: '1.0.0'
-      #     failure_criteria: 'CRITICAL:2, Operator:OR'
-      # - name: 'Check scan result and report not generated.'
-      #   run: |
-      #     if [ "${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}" != "" ]; then
-      #       exit 1
-      #     fi
-      #     if [ "${{ steps.no-violations-found.outputs.iac_scan_result }}" != "passed" ]; then
-      #       exit 1
-      #     fi
+      - id: 'no-violations-found'
+        name: 'No violations found in plan file'
+        uses: './'
+        with:
+          organization_id: '${{ env.ORGANIZATION_ID }}'
+          scan_file_ref: 'tests/resources/no-violations-tf_plan.json'
+          iac_type: 'terraform'
+          iac_version: '1.0.0'
+          failure_criteria: 'CRITICAL:2, Operator:OR'
+      - name: 'Check scan result and report not generated.'
+        run: |
+          if [ "${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}" != "" ]; then
+            exit 1
+          fi
+          if [ "${{ steps.no-violations-found.outputs.iac_scan_result }}" != "passed" ]; then
+            exit 1
+          fi
     
       - id: 'failure-criteria-satisfied'
         name: 'Failure criteria satisfied'
         uses: './'
         with:
           organization_id: '${{ env.ORGANIZATION_ID }}'
-          # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
+          # plan file has 1 UNSPECIFIED, 1 HIGH severity vulnerabilites
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
-          failure_criteria: 'CRITICAL:1, Operator:OR'
+          failure_criteria: 'HIGH:1, Operator:OR'
         continue-on-error: true
       - name: 'Check scan result and action build status'
         run: |
@@ -154,12 +153,12 @@ jobs:
         uses: './'
         with:
           organization_id: '${{ env.ORGANIZATION_ID }}'
-          # plan file has 1 CRITICAL, 2 LOW severity vulnerabilites
+          # plan file has 1 UNSPECIFIED, 1 HIGH severity vulnerabilites
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           iac_version: '1.0.0'
           ignore_violations: 'true'
-          failure_criteria: 'CRITICAL:1, Operator:OR'
+          failure_criteria: 'HIGH:1, Operator:OR'
       - name: 'Check scan result'
         run: |
           if [ "${{ steps.failure-criteria-satisfied-ignore-violations-true.outputs.iac_scan_result }}" != "failed" ]; then
