@@ -49,6 +49,7 @@ jobs:
 
 
    steps:
+   - uses: 'actions/checkout@v4' 
    - id: 'auth'
      uses: 'google-github-actions/auth@v2'
      with:
