@@ -4,7 +4,7 @@
 ## Description
 
 
-This Github action identifies insecure configurations in Infrastructure as Code (IaC) files for Google Cloud resources. This action requires Terraform plan files in JSON format for scanning.
+This GitHub action identifies insecure configurations in Infrastructure as Code (IaC) files for Google Cloud resources. This action requires Terraform plan files in JSON format for scanning.
 
 
 Use this action to detect and remediate issues in IaC files for Google Cloud before you deploy the resources.
@@ -15,15 +15,13 @@ This action lets you:
 - Display issues with their severity as a SARIF Report in the GitHub Workspace after a scan completes.
 - Define severity-based failure criteria for passing or failing the build.
 
+> [!IMPORTANT]
+> This is a Security Command Center Premium tier offering for subscription customers only. You must activate the Security Command Center Premium tier in the Google Cloud organization to use this feature.
+>
+> This offering is covered by the Pre-GA Offerings Terms of the Google Cloud Terms of Service.
 
-Note: This is a Security Command Center Premium tier offering for subscription customers only. You must activate the Security Command Center Premium tier in the Google Cloud organization to use this feature.
-
-
-This offering is covered by the Pre-GA Offerings Terms of the Google Cloud Terms of Service.
-
-
-Don’t enter any sensitive information such as passwords and other personal identifiable information in the Terraform plan files.
-
+> [!CAUTION]
+> Don’t enter any sensitive information such as passwords and other personal identifiable information in the Terraform plan files.
 
 ## Prerequisites
 
@@ -58,11 +56,11 @@ jobs:
 
 
    - id: 'analyze-code-security-scc'
-     uses: 'google-github-actions/analyze-code-security-scc@v1'
+     uses: 'google-github-actions/analyze-code-security-scc@v0'
      with:
        organization_id: '123456789'
        scan_file_ref: './tf_plan.json'
-       iac_type: terraform
+       iac_type: 'terraform'
        iac_version: '1.0.0'
        scan_timeout: '1m'
        ignore_violations: false
@@ -70,11 +68,12 @@ jobs:
        fail_silently: false
 
 
-   - if: ${{steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != ''}}
-       uses: actions/upload-artifact@v4
+   - if: |-
+       steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != ''
+       uses: 'actions/upload-artifact@v4'
        with:
-         name: sarif
-         path: ${{ steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path }}
+         name: 'sarif'
+         path: '${{ steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path }}'
 ```
 
 
@@ -147,14 +146,14 @@ jobs:
 
 
    - id: 'analyze-code-security-scc'
-     uses: 'google-github-actions/analyze-code-security-scc@v1'
+     uses: 'google-github-actions/analyze-code-security-scc@v0'
 ```
 
 
 ## Supported asset types and policies
 
 
-For information about supported asset types and policies, see IaC Validation - Supported assets and policies.
+For information about supported asset types and policies, see [IaC Validation - Supported assets and policies](https://www.gstatic.com/cloud_security_posture/iac_validation_supported_assets_and_policies.pdf).
 
 
 [sa]: https://cloud.google.com/iam/docs/creating-managing-service-accounts
