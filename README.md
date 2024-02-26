@@ -45,40 +45,37 @@ support](https://cloud.google.com/support).**
 
 ```yaml
 jobs:
- job_id:
-   permissions:
-     contents: 'read'
-     id-token: 'write'
+  job_id:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
+    steps:
+      - uses: 'actions/checkout@v4'
+      - id: 'auth'
+        uses: 'google-github-actions/auth@v2'
+        with:
+          workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+          service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
-   steps:
-   - uses: 'actions/checkout@v4' 
-   - id: 'auth'
-     uses: 'google-github-actions/auth@v2'
-     with:
-       workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-       service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+      - id: 'analyze-code-security-scc'
+        uses: 'google-github-actions/analyze-code-security-scc@v0'
+        with:
+          organization_id: '123456789'
+          scan_file_ref: './tf_plan.json'
+          iac_type: 'terraform'
+          iac_version: '1.0.0'
+          scan_timeout: '1m'
+          ignore_violations: false
+          failure_criteria: 'High:1,Medium:1,Low:1,Operator:or'
+          fail_silently: false
 
-
-   - id: 'analyze-code-security-scc'
-     uses: 'google-github-actions/analyze-code-security-scc@v0'
-     with:
-       organization_id: '123456789'
-       scan_file_ref: './tf_plan.json'
-       iac_type: 'terraform'
-       iac_version: '1.0.0'
-       scan_timeout: '1m'
-       ignore_violations: false
-       failure_criteria: 'High:1,Medium:1,Low:1,Operator:or'
-       fail_silently: false
-
-
-   - if: |-
-       steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != ''
-       uses: 'actions/upload-artifact@v4'
-       with:
-         name: 'sarif'
-         path: '${{ steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path }}'
+      - if: |-
+          steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != ''
+        uses: 'actions/upload-artifact@v4'
+        with:
+          name: 'sarif'
+          path: '${{ steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path }}'
 ```
 
 
