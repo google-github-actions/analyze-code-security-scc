@@ -94,7 +94,6 @@ jobs:
           # plan file has 1 UNSPECIFIED, 1 HIGH severity vulnerabilites
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
-          iac_version: '1.0.0'
           failure_criteria: 'CRITICAL:2, Operator:OR'
           ignore_violations: 'false'
           fail_silently: 'false'
@@ -117,7 +116,6 @@ jobs:
           organization_id: '${{ env.ORGANIZATION_ID }}'
           scan_file_ref: 'tests/resources/no-violations-tf_plan.json'
           iac_type: 'terraform'
-          iac_version: '1.0.0'
           failure_criteria: 'CRITICAL:2, Operator:OR'
       - name: 'Check scan result and report not generated.'
         run: |
@@ -136,7 +134,6 @@ jobs:
           # plan file has 1 UNSPECIFIED, 1 HIGH severity vulnerabilites
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
-          iac_version: '1.0.0'
           failure_criteria: 'HIGH:1, Operator:OR'
         continue-on-error: true
       - name: 'Check scan result and action build status'
@@ -156,7 +153,6 @@ jobs:
           # plan file has 1 UNSPECIFIED, 1 HIGH severity vulnerabilites
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
-          iac_version: '1.0.0'
           ignore_violations: 'true'
           failure_criteria: 'HIGH:1, Operator:OR'
       - name: 'Check scan result'
@@ -173,7 +169,6 @@ jobs:
           organization_id: 'invalid-id'
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
-          iac_version: '1.0.0'
         continue-on-error: true
       - name: 'Check scan result and build status'
         run: |
@@ -191,7 +186,6 @@ jobs:
           organization_id: 'invalid-id'
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
-          iac_version: '1.0.0'
           fail_silently: 'true'
       - name: Check scan result 
         run: |

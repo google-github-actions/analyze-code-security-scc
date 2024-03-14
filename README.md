@@ -64,7 +64,6 @@ jobs:
           organization_id: '123456789'
           scan_file_ref: './tf_plan.json'
           iac_type: 'terraform'
-          iac_version: '1.0.0'
           scan_timeout: '1m'
           ignore_violations: false
           failure_criteria: 'High:1,Medium:1,Low:1,Operator:or'
@@ -91,9 +90,6 @@ jobs:
 
 
 * `iac_type`: (Required) The IaC template type. Currently only Terraform is supported.
-
-
-* `iac_version`: (Required) The IaC template version. For example: '1.6.6',  or '1.6.5'.
 
 
 * `scan_time_out`: (Optional) The maximum time before the action stops. The time must be between '1m' and '10m'. The default is `1m`.

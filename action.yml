@@ -32,10 +32,6 @@ inputs:
     description: |-
       The IaC template type. Currently only Terraform is supported.
     required: true
-  iac_version:
-    description: |-
-      The IaC template version. For example: '1.6.6', or '1.6.5'.
-    required: true
   scan_timeout:
     description: |-
       The maximum time before the action stops. The time must be between '1m' and '10m'. 
