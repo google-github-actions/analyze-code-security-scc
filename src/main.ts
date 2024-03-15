@@ -83,9 +83,7 @@ async function run(): Promise<void> {
       throw new Error(`IAC type: ${iacType} not supported`);
     }
     const planFile: string = await fs.readFile(scanFileRef, 'utf-8');
-    logInfo(
-      `Successfully read IaC file from: ${scanFileRef}, IaC type: ${iacType}`,
-    );
+    logInfo(`Successfully read IaC file from: ${scanFileRef}, IaC type: ${iacType}`);
 
     const scanStartTime = new Date().getTime();
     const accessor = new IACAccessor(
@@ -97,7 +95,7 @@ async function run(): Promise<void> {
     );
     logInfo(`Fetching violations for IaC file`);
     const violations: Violation[] = await accessor.scan(planFile);
-    logDebug(`Violations fetched from IaC scan API's`);
+    logDebug(`Violations fetched from IaC scan APIs`);
 
     const sarifReportGenerator: SarifReportGenerator = new SarifReportGenerator(version);
     logInfo('Processing report generation for violations fetched');
