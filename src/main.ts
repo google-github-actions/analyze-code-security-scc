@@ -84,7 +84,7 @@ async function run(): Promise<void> {
     }
     const planFile: string = await fs.readFile(scanFileRef, 'utf-8');
     logInfo(
-      `Successfullly read IaC file from: ${scanFileRef}, IaC type: ${iacType}, IaC version: ${iacVersion}`,
+      `Successfully read IaC file from: ${scanFileRef}, IaC type: ${iacType}`,
     );
 
     const scanStartTime = new Date().getTime();
