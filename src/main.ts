@@ -43,8 +43,7 @@ import {
   IAC_SCAN_RESULT,
   IAC_SCAN_RESULT_OUTPUT_KEY,
   IAC_TYPE_CONFIG_KEY,
-  IAC_VERSION_CONFIG_KEY,
-  IGONRE_VIOLATIONS_CONFIG_KEY,
+  IGNORE_VIOLATIONS_CONFIG_KEY,
   MAX_SCAN_TIMEOUT,
   MIN_SCAN_TIMEOUT,
   ORGANIZATION_ID_CONFIG_KEY,
@@ -64,7 +63,6 @@ async function run(): Promise<void> {
     const organizationID = getInput(ORGANIZATION_ID_CONFIG_KEY, { required: true });
     const scanFileRef = getInput(SCAN_FILE_REF_CONFIG_KEY, { required: true });
     const iacType = getInput(IAC_TYPE_CONFIG_KEY, { required: true });
-    const iacVersion = getInput(IAC_VERSION_CONFIG_KEY, { required: true });
     const scanTimeoutInput = getInput(SCAN_TIMEOUT_CONFIG_KEY);
     const scanTimeoutMs = parseDuration(scanTimeoutInput) * 1000 || DEFAULT_SCAN_TIMEOUT;
     if (
@@ -76,7 +74,7 @@ async function run(): Promise<void> {
       );
     }
     const ignoreViolations = parseBoolean(
-      getInput(IGONRE_VIOLATIONS_CONFIG_KEY),
+      getInput(IGNORE_VIOLATIONS_CONFIG_KEY),
       DEFAULT_IGNORE_VIOLATIONS,
     );
     const failureCriteria = validateAndParseFailureCriteria(getInput(FAILURE_CRITERIA_CONFIG_KEY));
@@ -85,9 +83,7 @@ async function run(): Promise<void> {
       throw new Error(`IAC type: ${iacType} not supported`);
     }
     const planFile: string = await fs.readFile(scanFileRef, 'utf-8');
-    logInfo(
-      `Successfullly read IaC file from: ${scanFileRef}, IaC type: ${iacType}, IaC version: ${iacVersion}`,
-    );
+    logInfo(`Successfully read IaC file from: ${scanFileRef}, IaC type: ${iacType}`);
 
     const scanStartTime = new Date().getTime();
     const accessor = new IACAccessor(
@@ -99,7 +95,7 @@ async function run(): Promise<void> {
     );
     logInfo(`Fetching violations for IaC file`);
     const violations: Violation[] = await accessor.scan(planFile);
-    logDebug(`Violations fetched from IaC scan API's`);
+    logDebug(`Violations fetched from IaC scan APIs`);
 
     const sarifReportGenerator: SarifReportGenerator = new SarifReportGenerator(version);
     logInfo('Processing report generation for violations fetched');
