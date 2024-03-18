@@ -70,7 +70,7 @@ jobs:
           fail_silently: false
 
       - if: |-
-          (steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != '') && (success() || failure())
+          (steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != '') && always()
         uses: 'actions/upload-artifact@v4'
         with:
           name: 'sarif'
