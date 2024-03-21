@@ -70,7 +70,7 @@ jobs:
           fail_silently: false
 
       - if: |-
-          (steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != '') && always()
+          ${{ !cancelled() && steps.analyze-code-security-scc.outputs.iac_scan_result_sarif_path != '' }}
         uses: 'actions/upload-artifact@v4'
         with:
           name: 'sarif'
