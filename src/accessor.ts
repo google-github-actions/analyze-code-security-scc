@@ -87,6 +87,7 @@ export type OperationMetadata = {
 
 export type IACValidationReport = {
   violations?: Violation[];
+  note?: string;
 };
 
 export type Response = {
@@ -250,7 +251,7 @@ export class IACAccessor {
     }
   }
 
-  private processIACValidationResponse(operation: Operation): Violation[] {
+  private processIACValidationResponse(operation: Operation): IACValidationReport {
     const violations: Violation[] = [];
     operation.response?.iacValidationReport?.violations?.forEach((violation) => {
       if (!violation.severity) {
@@ -258,7 +259,11 @@ export class IACAccessor {
       }
       violations.push(violation);
     });
-    return violations;
+    const report: IACValidationReport = {
+      violations: violations,
+      note: operation.response?.iacValidationReport?.note,
+    };
+    return report;
   }
 
   /**
@@ -299,7 +304,7 @@ export class IACAccessor {
    *
    * @param iac IAC file to scan.
    */
-  async scan(iac: string): Promise<Violation[]> {
+  async scan(iac: string): Promise<IACValidationReport> {
     logDebug(`IaC scanning invoked at: ${this.scanStartTime}`);
     const request: IACRequest = {
       parent: this.organizationId,
