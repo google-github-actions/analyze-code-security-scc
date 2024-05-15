@@ -18,7 +18,7 @@ import * as fs from 'fs/promises';
 
 import { debug as logDebug, setOutput } from '@actions/core';
 
-import { Violation } from '../accessor';
+import { Violation, IACValidationReport } from '../accessor';
 import { Rule, Result, SARIFTemplate } from './sarif_template';
 import {
   SARIF_SCHEMA,
@@ -34,24 +34,24 @@ export abstract class IACScanReportProcessor {
    * Processes violations fetched from IaC scan API.
    *
    * If violations are found, this method generates the report and writes the report to the github workspace.
-   * @param violations violations found in IaC file.
+   * @param report IaC Validation report.
    * @param reportGenerator implementation of {@link ReportGenerator}
    * @param reportName name of the generated report.
    */
   static async processReport(
-    violations: Violation[],
+    report: IACValidationReport,
     reportGenerator: ReportGenerator,
     reportName: string,
   ) {
-    if (violations.length == 0) {
+    if (report.violations?.length == 0) {
       // no violations, returning as no action to take.
       return;
     }
 
-    const report = reportGenerator.generate(violations);
+    const generatedReport = reportGenerator.generate(report);
     logDebug(`IaC scan report generated`);
 
-    await fs.writeFile(reportName, report);
+    await fs.writeFile(reportName, generatedReport);
     setOutput(IAC_SCAN_RESULT_SARIF_PATH_OUTPUT_KEY, IAC_SCAN_RESULT_SARIF_PATH_OUTPUT_VALUE);
     logDebug(`IAC scan report written to github action workspace`);
   }
@@ -66,7 +66,7 @@ export interface ReportGenerator {
    *
    * @param violations non empty list of violation fetched from scan API response.
    */
-  generate(violations: Violation[]): string;
+  generate(report: IACValidationReport): string;
 }
 
 /**
@@ -84,11 +84,12 @@ export class SarifReportGenerator implements ReportGenerator {
    * fields undefined in scan API response are omitted from report.
    * @param violations non empty list of violation fetched from scan API response.
    */
-  generate(violations: Violation[]): string {
-    const policyToViolationMap = this.getUniqueViolation(violations);
+  generate(report: IACValidationReport): string {
+    const policyToViolationMap = this.getUniqueViolation(<Violation[]>report.violations);
     const rules: Rule[] = this.constructRules(policyToViolationMap);
-    const results: Result[] = this.constructResults(violations);
-    const sarifReport: SARIFTemplate = this.constructSARIFReport(rules, results);
+    const results: Result[] = this.constructResults(<Violation[]>report.violations);
+    const note: string = <string>report.note;
+    const sarifReport: SARIFTemplate = this.constructSARIFReport(rules, results, note);
     return JSON.stringify(sarifReport, null, 2);
   }
 
@@ -160,12 +161,13 @@ export class SarifReportGenerator implements ReportGenerator {
     return results;
   }
 
-  private constructSARIFReport(rules: Rule[], results: Result[]) {
+  private constructSARIFReport(rules: Rule[], results: Result[], note: string) {
     const sarifReport: SARIFTemplate = {
       version: SARIF_VERSION,
       $schema: SARIF_SCHEMA,
       runs: [
         {
+          note: note,
           tool: {
             driver: {
               name: IAC_TOOL_NAME,

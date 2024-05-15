@@ -23,7 +23,7 @@ import {
   IACScanReportProcessor,
   SarifReportGenerator,
 } from '../src/reports/iac_scan_report_processor';
-import { Severity, Violation } from '../src/accessor';
+import { Severity, Violation, IACValidationReport } from '../src/accessor';
 import { SARIFTemplate } from '../src/reports/sarif_template';
 import {
   IAC_TOOL_DOCUMENTATION_LINK,
@@ -58,7 +58,12 @@ test(
           },
         ];
 
-        await IACScanReportProcessor.processReport(violations, reportGenerator, 'sarif.json');
+        const report: IACValidationReport = {
+          note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
+          violations: violations,
+        };
+
+        await IACScanReportProcessor.processReport(report, reportGenerator, 'sarif.json');
         const sarif = await fs.readFile('./sarif.json', 'utf-8');
         const sarifJson: SARIFTemplate = JSON.parse(sarif);
 
@@ -139,7 +144,12 @@ test(
           },
         ];
 
-        await IACScanReportProcessor.processReport(violations, reportGenerator, 'sarif.json');
+        const report: IACValidationReport = {
+          note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
+          violations: violations,
+        };
+
+        await IACScanReportProcessor.processReport(report, reportGenerator, 'sarif.json');
         const sarif = await fs.readFile('./sarif.json', 'utf-8');
         const sarifJson: SARIFTemplate = JSON.parse(sarif);
 

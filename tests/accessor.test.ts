@@ -35,6 +35,7 @@ const POLL_OPERAITON_RESPONSE = {
   done: true,
   response: {
     iacValidationReport: {
+      note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
       violations: [
         {
           assetId: 'asset-id',
@@ -65,7 +66,7 @@ test(
       mockHttpResponse(m, 0, 200, CREATE_SCAN_OPERATION_RESPONSE);
       mockHttpResponse(m, 1, 200, POLL_OPERAITON_RESPONSE);
 
-      const violations = await accessor.scan(IAC);
+      const report = await accessor.scan(IAC);
 
       assert.deepStrictEqual(m.mock.calls.at(0)?.arguments.slice(0, 3), [
         'POST',
@@ -81,13 +82,16 @@ test(
         'GET',
         BASE_URL + '/' + 'operation-id',
       ]);
-      assert.deepStrictEqual(violations, [
-        {
-          assetId: 'asset-id',
-          policyId: 'policy-id',
-          severity: 'CRITICAL',
-        },
-      ]);
+      assert.deepStrictEqual(report, {
+        note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
+        violations: [
+          {
+            assetId: 'asset-id',
+            policyId: 'policy-id',
+            severity: 'CRITICAL',
+          },
+        ],
+      });
     });
 
     await suite.test('retry scan request for retryable errors', async function (t) {
@@ -268,6 +272,7 @@ test(
         done: true,
         response: {
           iacValidationReport: {
+            note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
             violations: [
               {
                 policyId: 'policy-id',
@@ -302,6 +307,7 @@ test(
         done: true,
         response: {
           iacValidationReport: {
+            note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
             violations: [
               {
                 assetId: 'asset-id',
@@ -336,6 +342,7 @@ test(
         done: true,
         response: {
           iacValidationReport: {
+            note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
             violations: [
               {
                 policyId: 'policy-id',
@@ -346,15 +353,18 @@ test(
         },
       });
 
-      const violations = await accessor.scan(IAC);
+      const report = await accessor.scan(IAC);
 
-      assert.deepStrictEqual(violations, [
-        {
-          assetId: 'asset-id',
-          policyId: 'policy-id',
-          severity: 'SEVERITY_UNSPECIFIED',
-        },
-      ]);
+      assert.deepStrictEqual(report, {
+        note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
+        violations: [
+          {
+            assetId: 'asset-id',
+            policyId: 'policy-id',
+            severity: 'SEVERITY_UNSPECIFIED',
+          },
+        ],
+      });
     });
 
     function mockHttpResponse(
