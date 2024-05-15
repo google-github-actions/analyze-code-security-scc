@@ -29,7 +29,7 @@ import { errorMessage, parseBoolean, parseDuration } from '@google-github-action
 
 import { IACType } from './input_configuration';
 import { isFailureCriteriaSatisfied, validateAndParseFailureCriteria } from './utils';
-import { IACAccessor, Violation } from './accessor';
+import { IACAccessor, Violation, IACValidationReport } from './accessor';
 import { VALIDATE_ENDPOINT_DOMAIN } from './commons/http_config';
 import { SarifReportGenerator } from './reports/iac_scan_report_processor';
 import { IACScanReportProcessor } from './reports/iac_scan_report_processor';
@@ -93,20 +93,23 @@ async function run(): Promise<void> {
       scanStartTime,
       version,
     );
-    logInfo(`Fetching violations for IaC file`);
-    const violations: Violation[] = await accessor.scan(planFile);
+    logInfo(`Fetching violations report for IaC file`);
+    const report: IACValidationReport = await accessor.scan(planFile);
     logDebug(`Violations fetched from IaC scan APIs`);
 
     const sarifReportGenerator: SarifReportGenerator = new SarifReportGenerator(version);
     logInfo('Processing report generation for violations fetched');
     await IACScanReportProcessor.processReport(
-      violations,
+      report,
       sarifReportGenerator,
       SARIF_REPORT_FILE_NAME,
     );
     logDebug(`IaC scan report processing completed`);
 
-    const failureCriteriaSatisfied = isFailureCriteriaSatisfied(failureCriteria, violations);
+    const failureCriteriaSatisfied = isFailureCriteriaSatisfied(
+      failureCriteria,
+      <Violation[]>report.violations,
+    );
     if (failureCriteriaSatisfied && !ignoreViolations) {
       setOutput(IAC_SCAN_RESULT_OUTPUT_KEY, IAC_SCAN_RESULT.FAILED);
       setFailed(ACTION_FAIL_ERROR(`${FAILURE_CRITERIA_CONFIG_KEY} was satisfied`));

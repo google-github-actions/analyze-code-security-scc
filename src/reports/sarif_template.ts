@@ -64,6 +64,7 @@ export type SARIFTemplate = {
   version: string;
   $schema: string;
   runs: {
+    note: string;
     tool: {
       driver: {
         name: string;
