@@ -82,42 +82,72 @@ jobs:
 
 ## Inputs
 
+<!-- BEGIN_AUTOGEN_INPUTS -->
 
-* `organization_id`: (Required) The Google Cloud organization ID for the organization which includes the resources that you want to modify.
+-   <a name="organization_id"></a><a href="#user-content-organization_id"><code>organization_id</code></a>: _(Required)_ Google Cloud organization ID for the organization which includes the
+    resources that you want to modify.
+
+-   <a name="scan_file_ref"></a><a href="#user-content-scan_file_ref"><code>scan_file_ref</code></a>: _(Required)_ Path to a file, relative to the local workspace, for the IaC file to scan.
+    For example:
+
+        ./tf_plan.json
+
+    or
+
+        ./artifacts/tf_plan.json
+
+-   <a name="iac_type"></a><a href="#user-content-iac_type"><code>iac_type</code></a>: _(Required, default: `terraform`)_ IaC template type. Currently only `terraform` is supported.
+
+-   <a name="scan_timeout"></a><a href="#user-content-scan_timeout"><code>scan_timeout</code></a>: _(Optional, default: `1m`)_ Maximum time before the scanning stops. This is specified as a time
+    duration value, such as "1m" or "5s". The value must be between "1m" and
+    "10m".
+
+-   <a name="ignore_violations"></a><a href="#user-content-ignore_violations"><code>ignore_violations</code></a>: _(Optional)_ Whether violations found in IaC file should be ignored when determining
+    the build status. This input does not apply to violations that are related
+    to generating SARIF reports and determining the `iac_scan_result`.
+
+-   <a name="failure_criteria"></a><a href="#user-content-failure_criteria"><code>failure_criteria</code></a>: _(Optional, default: `Critical:1, High:1, Medium:1, Low:1, Operator:OR`)_ Ffailure criteria that determines the workflow build status. You can set a
+    threshold for the number of critical, high, medium, and low severity
+    issues and use an aggregator (either `and` or `or`) to evaluate the
+    criteria.
+
+    To determine whether a build has failed, the threshold for each severity
+    is evaluated against the count of issues with that severity in the IaC
+    scan results and then severity level evaluations are aggregated using
+    `AND` or `OR` to arrive at `failure_criteria` value.
+
+    If the `failure_criteria` evaluates to `true`, the workflow is marked as
+    `FAILED`. Otherwise, the workflow is marked as `SUCCESS`.
+
+-   <a name="fail_silently"></a><a href="#user-content-fail_silently"><code>fail_silently</code></a>: _(Optional)_ If set to true, the workflow will not fail in case of any internal error
+    including invalid credentials and plugin dependency failure.
+
+    Note: This GitHub Action will always fail in case of any input validation
+    errors.
 
 
-* `scan_file_ref`: (Required) The absolute file path, including the file name, for the IaC file in the workspace. For example: './tf_plan.json', or './artifacts/tf_plan.json'.
-
-
-* `iac_type`: (Required) The IaC template type. Currently only Terraform is supported.
-
-
-* `scan_time_out`: (Optional) The maximum time before the action stops. The time must be between '1m' and '10m'. The default is `1m`.
-
-
-* `ignore_violations`: (Optional) Whether violations found in IaC file should be ignored when determining the build status. This input doesn’t apply to  violations that are related to generating SARIF reports and determining the `iac_scan_result`. The default is `false`.
-
-
-* `failure_criteria`: (Optional) The failure criteria that determines the workflow build status. You can set a threshold for the number of critical, high, medium, and low severity issues and use an aggregator  (either `and` or `or`) to evaluate the criteria. To determine whether a build has failed, the threshold for each severity is evaluated against the count of issues with that severity in the IaC scan results and then severity level evaluations are aggregated using `AND` or `OR` to arrive at `failure_criteria` value.
-
-
-If the `failure_criteria` evaluates to `true`, the workflow is marked as `FAILED`. Otherwise, the workflow is marked as `SUCCESS`. The default is "Critical:1, High:1, Medium:1, Low:1, Operator:or".
-
-
-* `fail_silently`: (Optional) Whether the workflow passes when an internal error (such as an invalid credential or plugin dependency failure) occurs. Note: The action always fails when the input is invalid. The default is `false`.
+<!-- END_AUTOGEN_INPUTS -->
 
 
 ## Outputs
 
+<!-- BEGIN_AUTOGEN_OUTPUTS -->
 
-* `iac_scan_result`: The result of the security scan. One of:
-1. `passed` - No violations were found or the `failure_criteria` was not satisfied.
-2. `failed` - The `failure_criteria` was satisfied.
-3. `error` - The action ran into an execution error, generally due to a misconfiguration or invalid credentials.
+-   `iac_scan_result`: The result of the security scan. One of:
+
+    - `passed`: No violations were found or the `failure_criteria` was not
+    satisfied.
+
+    - `failed`: The `failure_criteria` was satisfied.
+
+    - `error`: The action ran into an execution error, generally due to a
+    misconfiguration or invalid credentials.
+
+-   `iac_scan_result_sarif_path`: Path for the SARIF report file. This file is only available when
+    violations are found in the scan file.
 
 
-* `iac_scan_result_sarif_path`: The path for the SARIF report file. This file is only available when violations are found in the scan file.
-
+<!-- END_AUTOGEN_OUTPUTS -->
 
 ## Authorization
 
