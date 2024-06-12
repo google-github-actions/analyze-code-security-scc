@@ -18,7 +18,7 @@ export const SARIF_SCHEMA =
   'https://raw.githubusercontent.com/oasis-tcs/sarif-spec/master/Schemata/sarif-schema-2.1.0.json';
 export const SARIF_VERSION = '2.1.0';
 export const IAC_TOOL_NAME = 'analyze-code-security-scc';
-export const IAC_TOOL_DOCUMENTATION_LINK = 
+export const IAC_TOOL_DOCUMENTATION_LINK =
   'https://cloud.google.com/security-command-center/docs/validate-iac';
 export const SCAN_FILE_MAX_SIZE_BYTES = 2000000;
 export const MAX_SCAN_TIMEOUT = '10m';
