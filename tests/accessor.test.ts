@@ -55,7 +55,7 @@ test(
   async (suite) => {
     let accessor: IACAccessor;
     suite.beforeEach(function () {
-      accessor = new IACAccessor(BASE_URL, ORGANIZATION_ID, 60000, 0, 'version');
+      accessor = new IACAccessor(BASE_URL, ORGANIZATION_ID, 180000, 0, 'version');
       mock.method(Date.prototype, 'getTime', function () {
         return 0;
       });
