@@ -67,13 +67,13 @@ inputs:
       To determine whether a build has failed, the threshold for each severity
       is evaluated against the count of issues with that severity in the IaC
       scan results and then severity level evaluations are aggregated using
-      `AND` or `OR` to arrive at `failure_criteria` value. You must include an 
+      `AND` or `OR` to arrive at `failure_criteria` value. You must include an
       aggregator in the string. The aggregator value is case-sensitive.
 
       For example, if you set the failure criteria to `HIGH:1,LOW:1,OPERATOR:OR`,
-      the workflow fails if there is 1 or more HIGH severity findings or 1 or 
-      more LOW severity findings. If you set the failure criteria to 
-      `HIGH:1,LOW:1,OPERATOR:AND`, the workflow fails if there is 1 or more HIGH 
+      the workflow fails if there is 1 or more HIGH severity findings or 1 or
+      more LOW severity findings. If you set the failure criteria to
+      `HIGH:1,LOW:1,OPERATOR:AND`, the workflow fails if there is 1 or more HIGH
       severity findings and 1 or more LOW severity findings.
 
       If the `failure_criteria` evaluates to `true`, the workflow is marked as
