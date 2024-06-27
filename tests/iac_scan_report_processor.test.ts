@@ -157,7 +157,7 @@ test(
         assert.deepStrictEqual(sarifJson.runs.at(0)?.results.length, 2);
       },
     );
-    
+
     await suite.test(
       'zero violations, generates report with only the note field',
       async () => {
