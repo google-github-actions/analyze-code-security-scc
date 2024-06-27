@@ -38,14 +38,14 @@ inputs:
 
   iac_type:
     description: |-
-      The IaC template type. Currently only Terraform is supported. The value is 
-      'terraform'.
+      The IaC template type. Currently only Terraform is supported.
     default: 'terraform'
     required: true
 
   scan_timeout:
     description: |-
-      The maximum time before the scanning stops. The value must be between "1m" and `10m`. The default is "3m".
+      The maximum time before the scanning stops. The value must be between "1m"
+      and `10m`.
     default: '3m'
     required: false
 
@@ -53,8 +53,7 @@ inputs:
     description: |-
       Whether violations found in IaC file should be ignored when determining 
       the build status. This input doesn’t apply to  violations that are related 
-      to generating SARIF reports and determining the `iac_scan_result`. The 
-      default is `false`.
+      to generating SARIF reports and determining the `iac_scan_result`.
     default: false
     required: false
 
@@ -78,8 +77,7 @@ inputs:
       severity findings and 1 or more LOW severity findings.
 
       If the `failure_criteria` evaluates to `true`, the workflow is marked as
-      `FAILED`. Otherwise, the workflow is marked as `SUCCESS`. The default is 
-      'Critical:1,High:1,Medium:1,Low:1,Operator:OR'.
+      `FAILED`. Otherwise, the workflow is marked as `SUCCESS`.
     default: 'Critical:1, High:1, Medium:1, Low:1, Operator:OR'
     required: false
 
