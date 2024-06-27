@@ -20,7 +20,7 @@ description: |-
 inputs:
   organization_id:
     description: |-
-      Google Cloud organization ID for the organization which includes the 
+      Google Cloud organization ID for the organization which includes the
       resources that you want to modify. For example, '1234'.
     required: true
 
