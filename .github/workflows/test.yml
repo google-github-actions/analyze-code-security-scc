@@ -108,7 +108,7 @@ jobs:
           if [ "${{ steps.violations-found.outputs.iac_scan_result }}" != "passed" ]; then
             exit 1
           fi
-      
+
       - id: 'no-violations-found'
         name: 'No violations found in plan file'
         uses: './'
@@ -117,17 +117,17 @@ jobs:
           scan_file_ref: 'tests/resources/no-violations-tf_plan.json'
           iac_type: 'terraform'
           failure_criteria: 'CRITICAL:2, Operator:OR'
-      - name: 'Check scan result and report generated.'
-        run:
+      - name: 'Check scan result and report not generated.'
+        run: |
           report_expected="tests/resources/zero_violations_sarif.json"
           report_generated="${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}"
           if cmp -s "$report_expected" "$report_generated"; then
-          exit 1
+            exit 1
           fi
           if [ "${{ steps.no-violations-found.outputs.iac_scan_result }}" != "passed" ]; then
             exit 1
           fi
-    
+
       - id: 'failure-criteria-satisfied'
         name: 'Failure criteria satisfied'
         uses: './'
