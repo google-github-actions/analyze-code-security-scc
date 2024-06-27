@@ -43,10 +43,6 @@ export abstract class IACScanReportProcessor {
     reportGenerator: ReportGenerator,
     reportName: string,
   ) {
-    if (report.violations?.length == 0) {
-      // no violations, returning as no action to take.
-      return;
-    }
 
     const generatedReport = reportGenerator.generate(report);
     logDebug(`IaC scan report generated`);
