@@ -171,6 +171,6 @@ test(
 
       assert.deepStrictEqual(sarifJson.runs.at(0)?.tool.driver.rules.length, 0);
       assert.deepStrictEqual(sarifJson.runs.at(0)?.results.length, 0);
-    },);
+    });
   },
 );
