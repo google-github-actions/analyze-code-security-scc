@@ -21,9 +21,10 @@ Cloud product, please contact [Google Cloud
 support](https://cloud.google.com/support).**
 
 > [!IMPORTANT]
-> This is a Security Command Center Premium tier offering for subscription customers only. You must activate the Security Command Center Premium tier in the Google Cloud organization to use this feature.
->
-> This offering is covered by the Pre-GA Offerings Terms of the Google Cloud Terms of Service.
+> This action requires the Security Command Center Premium tier or Enterprise 
+> tier. In the Premium tier, you must be a subscription customer to use this 
+> action. You must activate Security Command Center at the organization level to
+> use this feature.
 
 > [!CAUTION]
 > Don’t enter any sensitive information such as passwords and other personal identifiable information in the Terraform plan files.
@@ -136,12 +137,12 @@ jobs:
 -   `iac_scan_result`: The result of the security scan. One of:
 
     - `passed`: No violations were found or the `failure_criteria` was not
-    satisfied.
+      satisfied.
 
     - `failed`: The `failure_criteria` was satisfied.
 
     - `error`: The action ran into an execution error, generally due to a
-    misconfiguration or invalid credentials.
+      misconfiguration or invalid credentials.
 
 -   `iac_scan_result_sarif_path`: Path for the SARIF report file. This file is only available when
     violations are found in the scan file.
@@ -159,22 +160,22 @@ to authenticate the action. You can use [Workload Identity Federation][wif] or
 
 ```yaml
 jobs:
- job_id:
-   permissions:
-     contents: 'read'
-     id-token: 'write'
+  job_id:
+    permissions:
+      contents: 'read'
+      id-token: 'write'
 
 
-   steps:
-   - id: 'auth'
-     uses: 'google-github-actions/auth@v2'
-     with:
-       workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
-       service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
+    steps:
+    - id: 'auth'
+      uses: 'google-github-actions/auth@v2'
+      with:
+        workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
+        service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
 
-   - id: 'analyze-code-security-scc'
-     uses: 'google-github-actions/analyze-code-security-scc@v0'
+    - id: 'analyze-code-security-scc'
+      uses: 'google-github-actions/analyze-code-security-scc@v0'
 ```
 
 
