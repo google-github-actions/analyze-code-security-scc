@@ -86,7 +86,7 @@ jobs:
 <!-- BEGIN_AUTOGEN_INPUTS -->
 
 -   <a name="organization_id"></a><a href="#user-content-organization_id"><code>organization_id</code></a>: _(Required)_ Google Cloud organization ID for the organization which includes the
-    resources that you want to modify.
+    resources that you want to modify. For example, '1234'.
 
 -   <a name="scan_file_ref"></a><a href="#user-content-scan_file_ref"><code>scan_file_ref</code></a>: _(Required)_ Path to a file, relative to the local workspace, for the IaC file to scan.
     For example:
@@ -97,25 +97,31 @@ jobs:
 
         ./artifacts/tf_plan.json
 
--   <a name="iac_type"></a><a href="#user-content-iac_type"><code>iac_type</code></a>: _(Required, default: `terraform`)_ IaC template type. Currently only `terraform` is supported.
+-   <a name="iac_type"></a><a href="#user-content-iac_type"><code>iac_type</code></a>: _(Required, default: `terraform`)_ The IaC template type. Currently only Terraform is supported.
 
--   <a name="scan_timeout"></a><a href="#user-content-scan_timeout"><code>scan_timeout</code></a>: _(Optional, default: `1m`)_ Maximum time before the scanning stops. This is specified as a time
-    duration value, such as "1m" or "5s". The value must be between "1m" and
-    "10m".
+-   <a name="scan_timeout"></a><a href="#user-content-scan_timeout"><code>scan_timeout</code></a>: _(Optional, default: `3m`)_ The maximum time before the scanning stops. The value must be between "1m"
+    and `10m`.
 
 -   <a name="ignore_violations"></a><a href="#user-content-ignore_violations"><code>ignore_violations</code></a>: _(Optional)_ Whether violations found in IaC file should be ignored when determining
-    the build status. This input does not apply to violations that are related
+    the build status. This input doesn't apply to violations that are related
     to generating SARIF reports and determining the `iac_scan_result`.
 
--   <a name="failure_criteria"></a><a href="#user-content-failure_criteria"><code>failure_criteria</code></a>: _(Optional, default: `Critical:1, High:1, Medium:1, Low:1, Operator:OR`)_ Ffailure criteria that determines the workflow build status. You can set a
-    threshold for the number of critical, high, medium, and low severity
+-   <a name="failure_criteria"></a><a href="#user-content-failure_criteria"><code>failure_criteria</code></a>: _(Optional, default: `Critical:1, High:1, Medium:1, Low:1, Operator:OR`)_ The failure criteria that determines the workflow build status. You can
+    set a threshold for the number of critical, high, medium, and low severity
     issues and use an aggregator (either `and` or `or`) to evaluate the
     criteria.
 
     To determine whether a build has failed, the threshold for each severity
     is evaluated against the count of issues with that severity in the IaC
     scan results and then severity level evaluations are aggregated using
-    `AND` or `OR` to arrive at `failure_criteria` value.
+    `AND` or `OR` to arrive at `failure_criteria` value. You must include an
+    aggregator in the string. The aggregator value is case-sensitive.
+
+    For example, if you set the failure criteria to `HIGH:1,LOW:1,OPERATOR:OR`,
+    the workflow fails if there is 1 or more HIGH severity findings or 1 or
+    more LOW severity findings. If you set the failure criteria to
+    `HIGH:1,LOW:1,OPERATOR:AND`, the workflow fails if there is 1 or more HIGH
+    severity findings and 1 or more LOW severity findings.
 
     If the `failure_criteria` evaluates to `true`, the workflow is marked as
     `FAILED`. Otherwise, the workflow is marked as `SUCCESS`.
@@ -137,12 +143,12 @@ jobs:
 -   `iac_scan_result`: The result of the security scan. One of:
 
     - `passed`: No violations were found or the `failure_criteria` was not
-      satisfied.
+    satisfied.
 
     - `failed`: The `failure_criteria` was satisfied.
 
     - `error`: The action ran into an execution error, generally due to a
-      misconfiguration or invalid credentials.
+    misconfiguration or invalid credentials.
 
 -   `iac_scan_result_sarif_path`: Path for the SARIF report file. This file is only available when
     violations are found in the scan file.
