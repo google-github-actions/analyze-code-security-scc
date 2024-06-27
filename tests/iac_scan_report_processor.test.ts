@@ -166,7 +166,7 @@ test(
       };
 
       await IACScanReportProcessor.processReport(report, reportGenerator, 'sarif.json');
-      const sarif = await fs.readFile('./sarif.json', 'utf-8');
+      const sarif = await fs.readFile('./zero_violations_sarif.json', 'utf-8');
       const sarifJson: SARIFTemplate = JSON.parse(sarif);
 
       assert.deepStrictEqual(sarifJson.runs.at(0)?.tool.driver.rules.length, 0);
