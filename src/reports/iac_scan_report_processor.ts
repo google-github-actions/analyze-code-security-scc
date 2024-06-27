@@ -43,7 +43,6 @@ export abstract class IACScanReportProcessor {
     reportGenerator: ReportGenerator,
     reportName: string,
   ) {
-
     const generatedReport = reportGenerator.generate(report);
     logDebug(`IaC scan report generated`);
 
