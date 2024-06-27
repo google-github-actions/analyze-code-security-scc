@@ -51,7 +51,7 @@ inputs:
 
   ignore_violations:
     description: |-
-      Whether violations found in IaC file should be ignored when determining 
+      Whether violations found in IaC file should be ignored when determining
       the build status. This input doesn't apply to violations that are related
       to generating SARIF reports and determining the `iac_scan_result`.
     default: false
