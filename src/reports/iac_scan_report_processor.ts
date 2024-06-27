@@ -43,11 +43,6 @@ export abstract class IACScanReportProcessor {
     reportGenerator: ReportGenerator,
     reportName: string,
   ) {
-    if (report.violations?.length == 0) {
-      // no violations, returning as no action to take.
-      return;
-    }
-
     const generatedReport = reportGenerator.generate(report);
     logDebug(`IaC scan report generated`);
 
@@ -85,10 +80,14 @@ export class SarifReportGenerator implements ReportGenerator {
    * @param violations non empty list of violation fetched from scan API response.
    */
   generate(report: IACValidationReport): string {
+    const note: string = <string>report.note;
+    if (report.violations?.length == 0) {
+      const sarifReport: SARIFTemplate = this.constructSARIFReport(<Rule[]>[], <Result[]>[], note);
+      return JSON.stringify(sarifReport, null, 2);
+    }
     const policyToViolationMap = this.getUniqueViolation(<Violation[]>report.violations);
     const rules: Rule[] = this.constructRules(policyToViolationMap);
     const results: Result[] = this.constructResults(<Violation[]>report.violations);
-    const note: string = <string>report.note;
     const sarifReport: SARIFTemplate = this.constructSARIFReport(rules, results, note);
     return JSON.stringify(sarifReport, null, 2);
   }
