@@ -81,7 +81,7 @@ export class SarifReportGenerator implements ReportGenerator {
    */
   generate(report: IACValidationReport): string {
     const note: string = <string>report.note;
-    if (report.violations?.length == 0) {
+    if (report.violations?.length === 0) {
       const sarifReport: SARIFTemplate = this.constructSARIFReport(<Rule[]>[], <Result[]>[], note);
       return JSON.stringify(sarifReport, null, 2);
     }
