@@ -1,6 +1,6 @@
 {
   "name": "@google-github-actions/analyze-code-security-scc",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Provides functionality to scan code for vulnerability during the build step of the project.",
   "main": "dist/main/index.js",
   "scripts": {
