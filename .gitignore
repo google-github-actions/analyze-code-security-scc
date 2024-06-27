@@ -1,6 +1,5 @@
 node_modules/
 runner/
-dist/
 
 # Rest of the file pulled from https://github.com/github/gitignore/blob/main/Node.gitignore
 # Logs
