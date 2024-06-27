@@ -59,9 +59,9 @@ inputs:
 
   failure_criteria:
     description: |-
-      The failure criteria that determines the workflow build status. You can 
-      set a threshold for the number of critical, high, medium, and low severity 
-      issues and use an aggregator (either `and` or `or`) to evaluate the 
+      The failure criteria that determines the workflow build status. You can
+      set a threshold for the number of critical, high, medium, and low severity
+      issues and use an aggregator (either `and` or `or`) to evaluate the
       criteria.
 
       To determine whether a build has failed, the threshold for each severity
