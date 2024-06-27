@@ -99,9 +99,9 @@ jobs:
           fail_silently: 'false'
           scan_timeout: '1m'
       - name: 'Check scan result and compare sarif report generated.'
-        run: |
+        run:
           report_expected="tests/resources/sarif.json"
-          report_generated="${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}"
+          report_generated="${{ steps.violations-found.outputs.iac_scan_result_sarif_path }}"
           if cmp -s "$report_expected" "$report_generated"; then
             exit 1
           fi
@@ -117,10 +117,10 @@ jobs:
           scan_file_ref: 'tests/resources/no-violations-tf_plan.json'
           iac_type: 'terraform'
           failure_criteria: 'CRITICAL:2, Operator:OR'
-      - name: 'Check scan result and report not generated.'
+      - name: 'Check scan result and report generated.'
         run:
           report_expected="tests/resources/zero_violations_sarif.json"
-          report_generated="${{ steps.violations-found.outputs.iac_scan_result_sarif_path }}"
+          report_generated="${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}"
           if cmp -s "$report_expected" "$report_generated"; then
           exit 1
           fi

@@ -158,7 +158,7 @@ test(
       },
     );
 
-    await suite.test('zero violations, generates report only the note', async () => {
+    await suite.test('zero violations, generates report with only the note', async () => {
       const reportGenerator = new SarifReportGenerator('version');
 
       const report: IACValidationReport = {
