@@ -159,18 +159,18 @@ test(
     );
     
     await suite.test(
-      'zero violations, generates report only the note field',
+      'zero violations, generates report with only the note field',
       async () => {
         const reportGenerator = new SarifReportGenerator('version');
-        
+
         const report: IACValidationReport = {
           note: 'IaC validation is limited to certain asset types and policies. For information about supported asset types and policies for IaC validation, see https://cloud.google.com/security-command-center/docs/supported-iac-assets-policies.',
         };
-        
+
         await IACScanReportProcessor.processReport(report, reportGenerator, 'sarif.json');
         const sarif = await fs.readFile('./sarif.json', 'utf-8');
         const sarifJson: SARIFTemplate = JSON.parse(sarif);
-        
+
         assert.deepStrictEqual(sarifJson.runs.at(0)?.tool.driver.rules.length, 0);
         assert.deepStrictEqual(sarifJson.runs.at(0)?.results.length, 0);
       },
