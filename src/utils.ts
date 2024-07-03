@@ -111,12 +111,18 @@ function constructKeyValueMapFromString(str?: string): Map<string, string> {
     if (criteria.split(':').length != 2) {
       throw new Error(`string format invalid`);
     }
-    const [key, value] = criteria.split(':');
-    keyValueMap.set(key.trim().toUpperCase(), value.trim().toUpperCase());
+    let [key, value] = criteria.split(':');
+    key = key.trim().toUpperCase();
+    value = value.trim().toUpperCase();
+    if (keyValueMap.has(key) && key == 'OPERATOR') {
+      throw new Error(`multiple operators found`);
+    } else if (keyValueMap.has(key)) {
+      throw new Error(`multiple severities of type ${key} found`);
+    }
+    keyValueMap.set(key, value);
   });
   return keyValueMap;
 }
-
 function validateAndExtractFailureCriteriaFromMap(
   keyValueMap: Map<string, string>,
 ): FailureCriteria {
@@ -125,9 +131,6 @@ function validateAndExtractFailureCriteriaFromMap(
 
   keyValueMap.forEach((value, key) => {
     if (isValidOperatorKey(key)) {
-      if (operator) {
-        throw new Error(`multiple operators found`);
-      }
       operator = extractOperatorValue(value);
       return;
     }
@@ -135,9 +138,6 @@ function validateAndExtractFailureCriteriaFromMap(
       key,
       /** errMsg= */ `invalid key: ${key}, value: ${value} pair found`,
     );
-    if (violationsThresholdBySeverity.has(severity)) {
-      throw new Error(`multiple severities of type ${key} found`);
-    }
     if (isNaN(+value)) {
       throw new Error(`invalid severity count`);
     }
