@@ -122,6 +122,11 @@ test(
         error: 'failure_criteria validation failed : multiple operators found',
       },
       {
+        name: 'multiple operators',
+        input: 'Low: 1, Operator: AND, Operator: OR',
+        error: 'failure_criteria validation failed : multiple operators found',
+      },
+      {
         name: 'no operator',
         input: 'Low: 1',
         error: 'failure_criteria validation failed : no operator found',
