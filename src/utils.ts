@@ -123,6 +123,7 @@ function constructKeyValueMapFromString(str?: string): Map<string, string> {
   });
   return keyValueMap;
 }
+
 function validateAndExtractFailureCriteriaFromMap(
   keyValueMap: Map<string, string>,
 ): FailureCriteria {
