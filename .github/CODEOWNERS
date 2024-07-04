@@ -1,1 +1,3 @@
 * @google-github-actions/maintainers @google-github-actions/analyze-code-security-scc-maintainers
+
+.github/CODEOWNERS @google-github-actions/maintainers
