@@ -30,7 +30,7 @@ export type PollOperationOptions = {
 
 export type Operation = {
   name: string;
-  metadata: Record<string, any>; // eslint-disable-line @typescript-eslint/no-explicit-any
+  metadata: Record<string, any>;
   done: boolean;
   error?: Error;
   response?: Response;
@@ -148,12 +148,7 @@ export class IACAccessor {
     this.retryCount = 0;
   }
 
-  private async request(
-    method: string,
-    url: string,
-    errorMsg: string,
-    data?: any, // eslint-disable-line @typescript-eslint/no-explicit-any
-  ) {
+  private async request(method: string, url: string, errorMsg: string, data?: any) {
     const authToken = await this.auth.getAccessToken();
 
     const headers = {
