@@ -17,6 +17,8 @@
 import { test, mock, Mock } from 'node:test';
 import assert from 'node:assert';
 
+import http from 'node:http';
+
 import { IACAccessor } from '../src/accessor';
 import { HttpClient } from '@actions/http-client';
 import { VALIDATE_ENDPOINT_PATH } from '../src/commons/http_config';
@@ -378,7 +380,7 @@ test(
           Promise.resolve({
             message: {
               statusCode: statusCode,
-            },
+            } as http.IncomingMessage,
             readBody() {
               return new Promise<string>((resolve) => {
                 resolve(JSON.stringify(body));
