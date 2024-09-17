@@ -255,6 +255,7 @@ export class IACAccessor {
       }
       violations.push(violation);
     });
+
     const skippedAssetTypes: string[] =
       operation.response?.iacValidationReport?.skippedAssetTypes ?? [];
 
