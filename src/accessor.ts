@@ -87,6 +87,7 @@ export type OperationMetadata = {
 
 export type IACValidationReport = {
   violations?: Violation[];
+  skippedAssetTypes: string[];
   note?: string;
 };
 
@@ -254,8 +255,12 @@ export class IACAccessor {
       }
       violations.push(violation);
     });
+    const skippedAssetTypes: string[] =
+      operation.response?.iacValidationReport?.skippedAssetTypes ?? [];
+
     const report: IACValidationReport = {
       violations: violations,
+      skippedAssetTypes: skippedAssetTypes,
       note: operation.response?.iacValidationReport?.note,
     };
     return report;
