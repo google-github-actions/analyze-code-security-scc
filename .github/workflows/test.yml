@@ -46,13 +46,10 @@ jobs:
 
       - uses: 'actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a' # ratchet:actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version-file: 'package.json'
 
       - name: 'npm build'
         run: 'npm ci && npm run build'
-
-      - name: 'npm lint'
-        run: 'npm run lint'
 
       - uses: 'google-github-actions/auth@v2' # ratchet:exclude
         with:
@@ -66,6 +63,7 @@ jobs:
     permissions:
       contents: 'read'
       id-token: 'write'
+
     runs-on: 'ubuntu-latest'
 
     env:
@@ -76,7 +74,7 @@ jobs:
 
       - uses: 'actions/setup-node@1d0ff469b7ec7b3cb9d8673fde0c81c44821de2a' # ratchet:actions/setup-node@v4
         with:
-          node-version: '20.x'
+          node-version-file: 'package.json'
 
       - name: 'npm build'
         run: 'npm ci && npm run build'
@@ -98,14 +96,17 @@ jobs:
           ignore_violations: 'false'
           fail_silently: 'false'
           scan_timeout: '1m'
+
       - name: 'Check scan result and compare sarif report generated.'
-        run: |
-          report_expected="tests/resources/sarif.json"
-          report_generated="${{ steps.violations-found.outputs.iac_scan_result_sarif_path }}"
-          if cmp -s "$report_expected" "$report_generated"; then
+        env:
+          REPORT_GENERATED: '${{ steps.violations-found.outputs.iac_scan_result_sarif_path }}'
+          SCAN_RESULT: '${{ steps.violations-found.outputs.iac_scan_result }}'
+        run: |-
+          REPORT_EXPECTED="tests/resources/sarif.json"
+          if cmp -s "${REPORT_EXPECTED}" "${REPORT_GENERATED}"; then
             exit 1
           fi
-          if [ "${{ steps.violations-found.outputs.iac_scan_result }}" != "passed" ]; then
+          if [ "${SCAN_RESULT}" != "passed" ]; then
             exit 1
           fi
 
@@ -117,14 +118,17 @@ jobs:
           scan_file_ref: 'tests/resources/no-violations-tf_plan.json'
           iac_type: 'terraform'
           failure_criteria: 'CRITICAL:2, Operator:OR'
+
       - name: 'Check scan result and report not generated.'
-        run: |
-          report_expected="tests/resources/zero_violations_sarif.json"
-          report_generated="${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}"
-          if cmp -s "$report_expected" "$report_generated"; then
+        env:
+          REPORT_GENERATED: '${{ steps.no-violations-found.outputs.iac_scan_result_sarif_path }}'
+          SCAN_RESULT: '${{ steps.no-violations-found.outputs.iac_scan_result }}'
+        run: |-
+          REPORT_EXPECTED="tests/resources/zero_violations_sarif.json"
+          if cmp -s "${REPORT_EXPECTED}" "${REPORT_GENERATED}"; then
             exit 1
           fi
-          if [ "${{ steps.no-violations-found.outputs.iac_scan_result }}" != "passed" ]; then
+          if [ "${SCAN_RESULT}" != "passed" ]; then
             exit 1
           fi
 
@@ -138,12 +142,16 @@ jobs:
           iac_type: 'terraform'
           failure_criteria: 'HIGH:1, Operator:OR'
         continue-on-error: true
+
       - name: 'Check scan result and action build status'
-        run: |
-          if [ "${{ steps.failure-criteria-satisfied.outputs.iac_scan_result }}" != "failed" ]; then
+        env:
+          SCAN_RESULT: '${{ steps.failure-criteria-satisfied.outputs.iac_scan_result }}'
+          SCAN_ERROR: '${{ steps.failure-criteria-satisfied.outcome }}'
+        run: |-
+          if [ "${SCAN_RESULT}" != "failed" ]; then
             exit 1
           fi
-          if [ "${{ steps.failure-criteria-satisfied.outcome }}" != "failure"]; then
+          if [ "${SCAN_ERROR}" != "failure" ]; then
            exit 1
           fi
 
@@ -157,9 +165,12 @@ jobs:
           iac_type: 'terraform'
           ignore_violations: 'true'
           failure_criteria: 'HIGH:1, Operator:OR'
+
       - name: 'Check scan result'
-        run: |
-          if [ "${{ steps.failure-criteria-satisfied-ignore-violations-true.outputs.iac_scan_result }}" != "failed" ]; then
+        env:
+          SCAN_RESULT: '${{ steps.failure-criteria-satisfied-ignore-violations-true.outputs.iac_scan_result }}'
+        run: |-
+          if [ "${SCAN_RESULT}" != "failed" ]; then
             exit 1
           fi
 
@@ -172,12 +183,16 @@ jobs:
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
         continue-on-error: true
+
       - name: 'Check scan result and build status'
-        run: |
-          if [ "${{ steps.action-internal-error.outputs.iac_scan_result }}" != "error" ]; then
+        env:
+          SCAN_RESULT: '${{ steps.action-internal-error.outputs.iac_scan_result }}'
+          SCAN_ERROR: '${{ steps.action-internal-error.outcome }}'
+        run: |-
+          if [ "${SCAN_RESULT}" != "error" ]; then
             exit 1
           fi
-          if [ "${{ steps.action-internal-error.outcome }}" != "failure" ]; then
+          if [ "${SCAN_ERROR}" != "failure" ]; then
             exit 1
           fi
 
@@ -189,8 +204,11 @@ jobs:
           scan_file_ref: 'tests/resources/with-violations-tf_plan.json'
           iac_type: 'terraform'
           fail_silently: 'true'
-      - name: Check scan result
-        run: |
-          if [ "${{ steps.action-internal-error-fail-silently-true.outputs.iac_scan_result }}" != "error" ]; then
+
+      - name: 'Check scan result'
+        env:
+          SCAN_RESULT: '${{ steps.action-internal-error-fail-silently-true.outputs.iac_scan_result }}'
+        run: |-
+          if [ "${SCAN_RESULT}" != "error" ]; then
             exit 1
           fi
