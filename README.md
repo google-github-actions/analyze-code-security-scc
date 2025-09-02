@@ -85,10 +85,10 @@ jobs:
 
 <!-- BEGIN_AUTOGEN_INPUTS -->
 
--   <a name="organization_id"></a><a href="#user-content-organization_id"><code>organization_id</code></a>: _(Required)_ Google Cloud organization ID for the organization which includes the
+-   <a name="__input_organization_id"></a><a href="#user-content-__input_organization_id"><code>organization_id</code></a>: _(Required)_ Google Cloud organization ID for the organization which includes the
     resources that you want to modify. For example, '1234'.
 
--   <a name="scan_file_ref"></a><a href="#user-content-scan_file_ref"><code>scan_file_ref</code></a>: _(Required)_ Path to a file, relative to the local workspace, for the IaC file to scan.
+-   <a name="__input_scan_file_ref"></a><a href="#user-content-__input_scan_file_ref"><code>scan_file_ref</code></a>: _(Required)_ Path to a file, relative to the local workspace, for the IaC file to scan.
     For example:
 
         ./tf_plan.json
@@ -97,16 +97,16 @@ jobs:
 
         ./artifacts/tf_plan.json
 
--   <a name="iac_type"></a><a href="#user-content-iac_type"><code>iac_type</code></a>: _(Required, default: `terraform`)_ The IaC template type. Currently only Terraform is supported.
+-   <a name="__input_iac_type"></a><a href="#user-content-__input_iac_type"><code>iac_type</code></a>: _(Required, default: `terraform`)_ The IaC template type. Currently only Terraform is supported.
 
--   <a name="scan_timeout"></a><a href="#user-content-scan_timeout"><code>scan_timeout</code></a>: _(Optional, default: `3m`)_ The maximum time before the scanning stops. The value must be between "1m"
+-   <a name="__input_scan_timeout"></a><a href="#user-content-__input_scan_timeout"><code>scan_timeout</code></a>: _(Optional, default: `3m`)_ The maximum time before the scanning stops. The value must be between "1m"
     and `10m`.
 
--   <a name="ignore_violations"></a><a href="#user-content-ignore_violations"><code>ignore_violations</code></a>: _(Optional)_ Whether violations found in IaC file should be ignored when determining
+-   <a name="__input_ignore_violations"></a><a href="#user-content-__input_ignore_violations"><code>ignore_violations</code></a>: _(Optional)_ Whether violations found in IaC file should be ignored when determining
     the build status. This input doesn't apply to violations that are related
     to generating SARIF reports and determining the `iac_scan_result`.
 
--   <a name="failure_criteria"></a><a href="#user-content-failure_criteria"><code>failure_criteria</code></a>: _(Optional, default: `Critical:1, High:1, Medium:1, Low:1, Operator:OR`)_ The failure criteria that determines the workflow build status. You can
+-   <a name="__input_failure_criteria"></a><a href="#user-content-__input_failure_criteria"><code>failure_criteria</code></a>: _(Optional, default: `Critical:1, High:1, Medium:1, Low:1, Operator:OR`)_ The failure criteria that determines the workflow build status. You can
     set a threshold for the number of critical, high, medium, and low severity
     issues and use an aggregator (either `and` or `or`) to evaluate the
     criteria.
@@ -126,7 +126,7 @@ jobs:
     If the `failure_criteria` evaluates to `true`, the workflow is marked as
     `FAILED`. Otherwise, the workflow is marked as `SUCCESS`.
 
--   <a name="fail_silently"></a><a href="#user-content-fail_silently"><code>fail_silently</code></a>: _(Optional)_ If set to true, the workflow will not fail in case of any internal error
+-   <a name="__input_fail_silently"></a><a href="#user-content-__input_fail_silently"><code>fail_silently</code></a>: _(Optional)_ If set to true, the workflow will not fail in case of any internal error
     including invalid credentials and plugin dependency failure.
 
     Note: This GitHub Action will always fail in case of any input validation
@@ -140,7 +140,7 @@ jobs:
 
 <!-- BEGIN_AUTOGEN_OUTPUTS -->
 
--   `iac_scan_result`: The result of the security scan. One of:
+-   <a name="__output_iac_scan_result"></a><a href="#user-content-__output_iac_scan_result"><code>iac_scan_result</code></a>: The result of the security scan. One of:
 
     - `passed`: No violations were found or the `failure_criteria` was not
     satisfied.
@@ -150,7 +150,7 @@ jobs:
     - `error`: The action ran into an execution error, generally due to a
     misconfiguration or invalid credentials.
 
--   `iac_scan_result_sarif_path`: Path for the SARIF report file. This file is only available when
+-   <a name="__output_iac_scan_result_sarif_path"></a><a href="#user-content-__output_iac_scan_result_sarif_path"><code>iac_scan_result_sarif_path</code></a>: Path for the SARIF report file. This file is only available when
     violations are found in the scan file.
 
 
