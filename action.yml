@@ -110,5 +110,5 @@ outputs:
       violations are found in the scan file.
 
 runs:
-  using: 'node20'
+  using: 'node24'
   main: 'dist/main/index.js'

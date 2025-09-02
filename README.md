@@ -21,8 +21,8 @@ Cloud product, please contact [Google Cloud
 support](https://cloud.google.com/support).**
 
 > [!IMPORTANT]
-> This action requires the Security Command Center Premium tier or Enterprise 
-> tier. In the Premium tier, you must be a subscription customer to use this 
+> This action requires the Security Command Center Premium tier or Enterprise
+> tier. In the Premium tier, you must be a subscription customer to use this
 > action. You must activate Security Command Center at the organization level to
 > use this feature.
 
@@ -35,7 +35,7 @@ support](https://cloud.google.com/support).**
 * This action requires a Google Cloud service account which has the **Security Posture Shift-Left Validator** role or the **Security Posture Admin** role on the Google Cloud organization that includes the IaC resources. For more information, see [Authorization](#authorization).
 
 
-* This action runs using Node 20. If you are using self-hosted GitHub Actions
+* This action runs using Node 24. If you are using self-hosted GitHub Actions
   runners, you must use a [runner
   version](https://github.com/actions/virtual-environments) that supports this
   version or later.
@@ -54,13 +54,13 @@ jobs:
     steps:
       - uses: 'actions/checkout@v4'
       - id: 'auth'
-        uses: 'google-github-actions/auth@v2'
+        uses: 'google-github-actions/auth@v3'
         with:
           workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
           service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
       - id: 'analyze-code-security-scc'
-        uses: 'google-github-actions/analyze-code-security-scc@v0'
+        uses: 'google-github-actions/analyze-code-security-scc@v1'
         with:
           organization_id: '123456789'
           scan_file_ref: './tf_plan.json'
@@ -174,14 +174,14 @@ jobs:
 
     steps:
     - id: 'auth'
-      uses: 'google-github-actions/auth@v2'
+      uses: 'google-github-actions/auth@v3'
       with:
         workload_identity_provider: 'projects/123456789/locations/global/workloadIdentityPools/my-pool/providers/my-provider'
         service_account: 'my-service-account@my-project.iam.gserviceaccount.com'
 
 
     - id: 'analyze-code-security-scc'
-      uses: 'google-github-actions/analyze-code-security-scc@v0'
+      uses: 'google-github-actions/analyze-code-security-scc@v1'
 ```
 
 
